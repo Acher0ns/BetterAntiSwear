@@ -22,16 +22,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 
-
-
-
-
-
-
-
-public class FancyMessage
-    implements JsonRepresentedObject, Cloneable, Iterable<MessagePart>, ConfigurationSerializable
-{
+public class FancyMessage implements JsonRepresentedObject, Cloneable, Iterable<MessagePart>, ConfigurationSerializable {
     private List<MessagePart> messageParts;
     private String jsonString;
     private boolean dirty;
@@ -40,11 +31,6 @@ public class FancyMessage
         ConfigurationSerialization.registerClass(FancyMessage.class);
     }
 
-
-
-
-
-    
     public FancyMessage clone() throws CloneNotSupportedException {
         FancyMessage instance = (FancyMessage)super.clone();
         instance.messageParts = new ArrayList<>(this.messageParts.size());
@@ -56,11 +42,6 @@ public class FancyMessage
         return instance;
     }
 
-
-
-
-
-    
     public FancyMessage(String firstPartText) {
         this(TextualComponent.rawText(firstPartText));
     }
@@ -72,19 +53,10 @@ public class FancyMessage
         this.dirty = false;
     }
 
-
-
-    
     public FancyMessage() {
         this((TextualComponent)null);
     }
 
-
-
-
-
-
-    
     public FancyMessage text(String text) {
         MessagePart latest = latest();
         latest.text = TextualComponent.rawText(text);
@@ -92,12 +64,6 @@ public class FancyMessage
         return this;
     }
 
-
-
-
-
-
-    
     public FancyMessage text(TextualComponent text) {
         MessagePart latest = latest();
         latest.text = text;
@@ -105,13 +71,6 @@ public class FancyMessage
         return this;
     }
 
-
-
-
-
-
-
-    
     public FancyMessage color(ChatColor color) {
         if (!color.isColor()) {
             throw new IllegalArgumentException(String.valueOf(color.name()) + " is not a color");
@@ -121,10 +80,6 @@ public class FancyMessage
         return this;
     }
 
-
-
-
-    
     public FancyMessage style(ChatColor... styles) {
         byte b;
         int i;
@@ -139,108 +94,47 @@ public class FancyMessage
         return this;
     }
 
-
-
-
-
-
-    
     public FancyMessage file(String path) {
         onClick("open_file", path);
         return this;
     }
 
-
-
-
-
-
-    
     public FancyMessage link(String url) {
         onClick("open_url", url);
         return this;
     }
 
-
-
-
-
-
-
-    
     public FancyMessage suggest(String command) {
         onClick("suggest_command", command);
         return this;
     }
 
-
-
-
-
-
-
-    
     public FancyMessage insert(String command) {
         (latest()).insertionData = command;
         this.dirty = true;
         return this;
     }
 
-
-
-
-
-
-
-    
     public FancyMessage command(String command) {
         onClick("run_command", command);
         return this;
     }
 
-
-
-
-
-
-
-    
     public FancyMessage achievementTooltip(String name) {
         onHover("show_achievement", new JsonString("achievement." + name));
         return this;
     }
 
-
-
-
-
-
-
-    
     public FancyMessage tooltip(String text) {
         onHover("show_text", new JsonString(text));
         return this;
     }
 
-
-
-
-
-
-
-    
     public FancyMessage tooltip(Iterable<String> lines) {
         tooltip((String[])ArrayWrapper.toArray(lines, String.class));
         return this;
     }
 
-
-
-
-
-
-
-    
     public FancyMessage tooltip(String... lines) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < lines.length; i++) {
@@ -253,13 +147,6 @@ public class FancyMessage
         return this;
     }
 
-
-
-
-
-
-
-    
     public FancyMessage formattedTooltip(FancyMessage text) {
         for (MessagePart component : text.messageParts) {
             if (component.clickActionData != null && component.clickActionName != null)
@@ -272,13 +159,6 @@ public class FancyMessage
         return this;
     }
 
-
-
-
-
-
-
-    
     public FancyMessage formattedTooltip(FancyMessage... lines) {
         if (lines.length < 1) {
             onHover(null, null);
@@ -311,20 +191,10 @@ public class FancyMessage
         return formattedTooltip(result.messageParts.isEmpty() ? null : result);
     }
 
-
-
-
-
-
-
-    
     public FancyMessage formattedTooltip(Iterable<FancyMessage> lines) {
         return formattedTooltip((FancyMessage[])ArrayWrapper.toArray(lines, FancyMessage.class));
     }
 
-
-
-    
     public FancyMessage translationReplacements(String... replacements) {
         byte b;
         int i;
@@ -337,25 +207,6 @@ public class FancyMessage
         return this;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
     public FancyMessage translationReplacements(FancyMessage... replacements) {
         byte b;
         int i;
@@ -369,34 +220,14 @@ public class FancyMessage
         return this;
     }
 
-
-
-
-
-
-    
     public FancyMessage translationReplacements(Iterable<FancyMessage> replacements) {
         return translationReplacements((FancyMessage[])ArrayWrapper.toArray(replacements, FancyMessage.class));
     }
 
-
-
-
-
-
-
-    
     public FancyMessage then(String text) {
         return then(TextualComponent.rawText(text));
     }
 
-
-
-
-
-
-
-    
     public FancyMessage then(TextualComponent text) {
         if (!latest().hasText()) {
             throw new IllegalStateException("previous message part has no text");
@@ -406,12 +237,6 @@ public class FancyMessage
         return this;
     }
 
-
-
-
-
-
-    
     public FancyMessage then() {
         if (!latest().hasText()) {
             throw new IllegalStateException("previous message part has no text");
@@ -420,7 +245,6 @@ public class FancyMessage
         this.dirty = true;
         return this;
     }
-
     
     public void writeJson(JsonWriter writer) throws IOException {
         if (this.messageParts.size() == 1) {
@@ -434,12 +258,6 @@ public class FancyMessage
         } 
     }
 
-
-
-
-
-
-    
     public String toJSONString() {
         if (!this.dirty && this.jsonString != null) {
             return this.jsonString;
@@ -457,11 +275,6 @@ public class FancyMessage
         return this.jsonString;
     }
 
-
-
-
-
-    
     public void send(Player player) {
         send((CommandSender)player, toJSONString());
     }
@@ -475,24 +288,10 @@ public class FancyMessage
         Bukkit.dispatchCommand((CommandSender)Bukkit.getConsoleSender(), "tellraw " + player.getName() + " " + jsonString);
     }
 
-
-
-
-
-
-
-
-    
     public void send(CommandSender sender) {
         send(sender, toJSONString());
     }
 
-
-
-
-
-
-    
     public void send(Iterable<? extends CommandSender> senders) {
         String string = toJSONString();
         for (CommandSender sender : senders) {
@@ -500,23 +299,6 @@ public class FancyMessage
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
     public String toOldMessageFormat() {
         StringBuilder result = new StringBuilder();
         for (MessagePart part : this) {
@@ -547,7 +329,6 @@ public class FancyMessage
         this.dirty = true;
     }
 
-    
     public Map<String, Object> serialize() {
         HashMap<String, Object> map = new HashMap<>();
         map.put("messageParts", this.messageParts);
@@ -555,14 +336,6 @@ public class FancyMessage
         return map;
     }
 
-
-
-
-
-
-
-
-    
     public static FancyMessage deserialize(Map<String, Object> serialized) {
         FancyMessage msg = new FancyMessage();
         msg.messageParts = (List<MessagePart>)serialized.get("messageParts");
@@ -571,21 +344,11 @@ public class FancyMessage
         return msg;
     }
 
-
-
-    
     public Iterator<MessagePart> iterator() {
         return this.messageParts.iterator();
     }
     
     private static JsonParser _stringParser = new JsonParser();
-
-
-
-
-
-
-
     
     public static FancyMessage deserialize(String json) {
         JsonObject serialized = _stringParser.parse(json).getAsJsonObject();

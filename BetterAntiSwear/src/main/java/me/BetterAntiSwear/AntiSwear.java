@@ -40,24 +40,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-public class AntiSwear
-    extends JavaPlugin
-    implements Listener
-{
+public class AntiSwear extends JavaPlugin implements Listener {
     HashMap<String, Integer> swearCount = new HashMap<>();
     ArrayList<String> globalMute = new ArrayList<>();
     ConfigManager man = new ConfigManager();
@@ -69,7 +52,6 @@ public class AntiSwear
     SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
     
     public static FileConfiguration config;
-
     
     public void logToFile(String message) {
         try {
@@ -88,21 +70,13 @@ public class AntiSwear
             PrintWriter pw = new PrintWriter(fw);
             
             pw.println(message);
-            
             pw.flush();
-            
             pw.close();
-        }
-        catch (IOException e) {
-            
+        } catch (IOException e) {
             e.printStackTrace();
         } 
     }
 
-
-
-
-    
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
@@ -128,28 +102,20 @@ public class AntiSwear
                 ver = Double.parseDouble(version);
             }
 
-            
             con.disconnect();
-        
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             getLogger().info("Failed to check for an update on Spigot.");
         } 
         return ver;
     }
 
-
-
-    
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent er) {
         Player p = er.getPlayer();
         if (p.hasPermission("antiswear.manage")) {
-            
             double version = updatecheck();
             double localversion = Double.parseDouble(this.pdfFile.getVersion());
             if (localversion < version) {
-                
                 p.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                             String.valueOf(getConfig().getString("prefix")) + " &cThis server is running an older version (" + 
                             this.pdfFile.getVersion() + 
@@ -162,10 +128,6 @@ public class AntiSwear
         } 
     }
 
-
-
-
-    
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onChatEvent(AsyncPlayerChatEvent e) {
         if (this.globalMute.contains("true")) {
@@ -179,9 +141,6 @@ public class AntiSwear
         } 
     }
 
-
-
-    
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void PlayerCommand(PlayerCommandPreprocessEvent e) {
         if (e.getPlayer().hasPermission("antiswear.bypass")) {
@@ -190,13 +149,10 @@ public class AntiSwear
         
         String me1 = e.getMessage().replace("/", "");
         String message = ChatColor.stripColor(me1.replaceAll("&", "§"));
-
-        
         if (message.startsWith("as") || message.startsWith("antiswear") || message.startsWith("asw")) {
             return;
         }
 
-        
         for (String word : getConfig().getStringList("words")) {
             byte b; int i; String[] arrayOfString; for (i = (arrayOfString = e.getMessage().split(" ")).length, b = 0; b < i; ) { String message1 = arrayOfString[b];
                 
@@ -208,25 +164,18 @@ public class AntiSwear
                     b1++; }
                 
                 String filtered = builder.toString();
-                
                 if (filtered.toLowerCase().equalsIgnoreCase(word.toLowerCase()))
                 {
                     e.setCancelled(true);
                 }
-                
                 b++; }
-        
-        } 
+        }
+
         if (e.isCancelled())
         {
             onSwear(e.getPlayer(), e.getMessage());
         }
     }
-
-
-
-
-
     
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onPlayerChat(AsyncPlayerChatEvent e) {
@@ -236,29 +185,24 @@ public class AntiSwear
         
         String me2 = e.getMessage().replace("/", "");
         String messagens = ChatColor.stripColor(me2.replaceAll("&", "§"));
-        
         for (String word : getConfig().getStringList("words")) {
-            byte b; int i; String[] arrayOfString; for (i = (arrayOfString = messagens.split(" ")).length, b = 0; b < i; ) { String message = arrayOfString[b];
-                
+            byte b; int i; String[] arrayOfString; 
+            for (i = (arrayOfString = messagens.split(" ")).length, b = 0; b < i; ) { String message = arrayOfString[b];
                 StringBuilder builder = new StringBuilder(); byte b1; int j; char[] arrayOfChar;
                 for (j = (arrayOfChar = message.toCharArray()).length, b1 = 0; b1 < j; ) { char character = arrayOfChar[b1];
                     if ((character >= '0' && character <= '9') || (character >= 'A' && character <= 'Z') || (
                         character >= 'a' && character <= 'z')) {
                         builder.append(character);
                     }
-                    b1++; }
-                
-                String filtered = builder.toString();
-                
-                if (filtered.toLowerCase().equalsIgnoreCase(word.toLowerCase()))
-                {
-                    
-                    e.setCancelled(true);
+                    b1++;
                 }
 
-                
+                String filtered = builder.toString();
+                if (filtered.toLowerCase().equalsIgnoreCase(word.toLowerCase()))
+                {
+                    e.setCancelled(true);
+                }
                 b++; }
-        
         } 
         
         if (e.isCancelled())
@@ -267,145 +211,108 @@ public class AntiSwear
         }
     }
 
-
-    
     public void onSwear(final Player p, String message) {
         this.swears++;
-        
         if (getConfig().getBoolean("log")) {
             logToFile("[" + this.format.format(this.now) + "] " + p.getName() + ": " + message);
         }
         
         if (!this.swearCount.containsKey(p.getName())) {
             this.swearCount.put(p.getName(), Integer.valueOf(1));
-        } else {
-            
+        } else {  
             this.swearCount.put(p.getName(), Integer.valueOf(((Integer)this.swearCount.get(p.getName())).intValue() + 1));
         } 
         
         if (getConfig().getBoolean("kick")) {
             if (((Integer)this.swearCount.get(p.getName())).intValue() >= getConfig().getInt("times")) {
                 this.swearCount.put(p.getName(), Integer.valueOf(0));
-                Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin)this, new Runnable() {
-                            public void run() {
-                                p.kickPlayer(ChatColor.translateAlternateColorCodes('&', ChatColor.RED + 
-                                            AntiSwear.config.getString("kickmessage").replaceAll("%player%", p.getName())));
-                            }
-                        });
+                Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin)this, () -> {
+                    p.kickPlayer(ChatColor.translateAlternateColorCodes('&', ChatColor.RED + AntiSwear.config.getString("kickmessage").replaceAll("%player%", p.getName())));
+                });
             } 
-
-            
             return;
         } 
         
         if (getConfig().getString("reportmessage") == null) {
             Bukkit.broadcast(
-                    ChatColor.translateAlternateColorCodes('&', 
-                        String.valueOf(getConfig().getString("prefix")) + ChatColor.RED + " %player% tried saying '" + 
-                        ChatColor.DARK_RED + message + ChatColor.RED + "'.")
-                    .replaceAll("%player%", p.getName()), "antiswear.mod");
+                ChatColor.translateAlternateColorCodes('&', 
+                String.valueOf(getConfig().getString("prefix")) + ChatColor.RED + " %player% tried saying '" + 
+                ChatColor.DARK_RED + message + ChatColor.RED + "'.")
+                .replaceAll("%player%", p.getName()), "antiswear.mod"
+            );
         } else {
             Bukkit.broadcast(
-                    ChatColor.translateAlternateColorCodes('&', 
-                        String.valueOf(getConfig().getString("prefix")) + " " + getConfig().getString("reportmessage"))
-                    .replaceAll("%player%", p.getName()).replaceAll("%message%", message), "antiswear.mod");
+                ChatColor.translateAlternateColorCodes('&',
+                String.valueOf(getConfig().getString("prefix")) + " " + getConfig().getString("reportmessage"))
+                .replaceAll("%player%", p.getName())
+                .replaceAll("%message%", message), "antiswear.mod");
         } 
         
         if (p.isOnline()) {
-            
             if (!getConfig().getString("command").equalsIgnoreCase("none")) {
                 Bukkit.getServer().dispatchCommand((CommandSender)Bukkit.getServer().getConsoleSender(), 
-                        getConfig().getString("command").replaceAll("%player%", p.getName()));
+                    getConfig().getString("command").replaceAll("%player%", p.getName()));
             }
 
-            
-            if (getConfig().getBoolean("damagetoggle"))
-            {
-                Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin)this, new Runnable()
-                        {
-                            public void run() {
-                                double damageAmount = Double.parseDouble(AntiSwear.config.getString("damage"));
-                                p.damage(damageAmount);
-                            }
-                        }, 
-                        1L);
+            if (getConfig().getBoolean("damagetoggle")) {
+                Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin)this, () -> {
+                    double damageAmount = Double.parseDouble(AntiSwear.config.getString("damage"));
+                    p.damage(damageAmount);
+                }, 
+                1L);
             }
 
-            
-            Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin)this, new Runnable()
-                    {
-                        public void run() {
-                            Location loc = p.getLocation()
-                                .add(p.getLocation().getDirection().normalize().multiply(2.6D));
-                            
-                            Random rand = new Random();
-                            
-                            int random = rand.nextInt(10000);
+            Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin)this, () -> {
+                Location loc = p.getLocation().add(p.getLocation().getDirection().normalize().multiply(2.6D));
+                Random rand = new Random();
+                int random = rand.nextInt(10000);
 
-
-                            
-                            if (AntiSwear.this.getServer().getPluginManager().getPlugin("HoloGramAPI") != null)
-                            {
-                                HoloGramAPI.createTempHoloGram(loc, AntiSwear.this.getConfig().getString("holomessage").replaceAll("%player%", p.getName()), Integer.valueOf(random), Integer.valueOf(AntiSwear.this.getConfig().getInt("holotime")), false, false, false, null, null, null);
-
-
-                            
-                            }
-                        }
-                    });
+                if (AntiSwear.this.getServer().getPluginManager().getPlugin("HoloGramAPI") != null)
+                {
+                    HoloGramAPI.createTempHoloGram(loc, AntiSwear.this.getConfig().getString("holomessage").replaceAll("%player%", p.getName()), Integer.valueOf(random), Integer.valueOf(AntiSwear.this.getConfig().getInt("holotime")), false, false, false, null, null, null);
+                }
+            });
             
             if (config.getBoolean("actionbar")) {
                 ActionBar actionBar = new ActionBar();
                 actionBar.setMessage(
-                        ChatColor.translateAlternateColorCodes('&', 
-                            String.valueOf(getConfig().getString("prefix")) + " " + 
-                            getConfig().getString("actionbarmessage"))
-                        .replace("%player%", p.getName()));
+                    ChatColor.translateAlternateColorCodes('&', 
+                    String.valueOf(getConfig().getString("prefix")) + " " + 
+                    getConfig().getString("actionbarmessage"))
+                    .replace("%player%", p.getName()));
                 actionBar.send(new Player[] { p });
             } 
 
             
             if (getConfig().getBoolean("sound")) {
                 p.playSound(p.getLocation(), 
-                        Sound.valueOf(getConfig().getString("soundvalue").toUpperCase()), 1.0F, 1.0F);
+                    Sound.valueOf(getConfig().getString("soundvalue").toUpperCase()), 1.0F, 1.0F);
             }
 
             
             if (getConfig().getBoolean("balance") && 
                 getServer().getPluginManager().getPlugin("Vault") != null) {
-                
                 int amou = getConfig().getInt("balamount");
-                
                 EconomyResponse r = econ.withdrawPlayer((OfflinePlayer)p, amou);
                 
-                if (r.transactionSuccess())
-                {
+                if (r.transactionSuccess()) {
                     p.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                String.valueOf(getConfig().getString("prefix")) + " " + 
-                                getConfig().getString("chargemessage")
-                                .replaceAll("%player%", p.getName())
-                                .replaceAll("%amount%", (new StringBuilder(String.valueOf(amou))).toString())));
+                        String.valueOf(getConfig().getString("prefix")) + " " + 
+                        getConfig().getString("chargemessage")
+                        .replaceAll("%player%", p.getName())
+                        .replaceAll("%amount%", (new StringBuilder(String.valueOf(amou))).toString())));
                 }
             } 
 
-
-
-
-            
             if (getConfig().getBoolean("chatmessage")) {
                 p.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("%s %s", new Object[] {
-                                    getConfig().getString("prefix"), 
-                                    getConfig().getString("message").replaceAll("%player%", p.getName())
-                                })));
+                    getConfig().getString("prefix"), 
+                    getConfig().getString("message").replaceAll("%player%", p.getName())
+                })));
             }
         } 
     }
 
-
-
-
-
-    
     public void onEnable() {
         try {
             this.man.createConfig("data", (Plugin)this);
@@ -416,7 +323,6 @@ public class AntiSwear
             getLogger().warning("Something went wrong while generating a data file.");
         } 
 
-        
         try {
             if (!getDataFolder().exists()) {
                 getDataFolder().mkdirs();
@@ -429,7 +335,6 @@ public class AntiSwear
             e.printStackTrace();
         } 
 
-        
         this.pdfFile = getDescription();
         double version = updatecheck();
         double localversion = Double.parseDouble(this.pdfFile.getVersion());
@@ -437,11 +342,6 @@ public class AntiSwear
             getLogger().info("There is an update available. This server is running Antiswear version " + localversion + ", but version " + version + "is available.");
         }
 
-
-        
-
-
-        
         if (getServer().getPluginManager().getPlugin("HoloGramAPI") != null) {
             Bukkit.getConsoleSender()
                 .sendMessage(ChatColor.GOLD + "[AntiSwear] " + ChatColor.GREEN + "Hooked into HoloGramAPI.");
@@ -451,15 +351,12 @@ public class AntiSwear
         }
         this.globalMute.add("false");
 
-        
         getLogger()
             .info(String.valueOf(this.pdfFile.getName()) + " Version: " + this.pdfFile.getVersion() + " by brooky1010 is enabled!");
         config = getConfig();
         
         Bukkit.getServer().getPluginManager().registerEvents(this, (Plugin)this);
 
-
-        
         if (!setupEconomy()) {
             getLogger()
                 .severe(String.format("Economy module deactivated - Vault not found", new Object[] { getDescription().getName() }));
@@ -467,17 +364,12 @@ public class AntiSwear
         } 
     }
 
-
-
-    
     public void onDisable() {
         this.pdfFile = getDescription();
         getLogger().info(String.valueOf(this.pdfFile.getName()) + " by brooky1010 is now disabled!");
         getLogger().info("Website: themilkywalrus.com");
     }
 
-
-    
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         if (cmd.getName().equalsIgnoreCase("antiswear")) {
             if (args.length == 0) {
@@ -504,15 +396,11 @@ public class AntiSwear
             } 
             
             if (args[0].equalsIgnoreCase("reload")) {
-
-
-                
                 if (!sender.hasPermission("antiswear.reload")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
                 } 
                 reloadConfig();
-                
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + ChatColor.RED + getConfig().getString("reload_message")));
             }
@@ -559,7 +447,8 @@ public class AntiSwear
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                                 "&6]&l&m-------------------&r&6[&c&lHelp 1&6]&l&m-------------------&r&6["));
                     return true;
-                } 
+                }
+
                 if (args[1].equalsIgnoreCase("2")) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                                 "&6]&l&m-------------&r&6[&c&lAdvanced AntiSwear&6]&l&m-------------&r&6["));
@@ -583,11 +472,7 @@ public class AntiSwear
                 } 
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                             String.valueOf(getConfig().getString("prefix")) + " &cPlease enter 1 or 2."));
-
-
-            
-            }
-            else if (args[0].equalsIgnoreCase("add")) {
+            } else if (args[0].equalsIgnoreCase("add")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
@@ -599,14 +484,12 @@ public class AntiSwear
                     return true;
                 } 
 
-                
                 if (getConfig().getStringList("words").contains(args[1])) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                                 " " + ChatColor.RED + "This word is already on the list!"));
                     return true;
                 } 
 
-                
                 List<String> list = getConfig().getStringList("words");
                 list.add(args[1].toLowerCase());
                 getConfig().set("words", list);
@@ -614,16 +497,12 @@ public class AntiSwear
                 reloadConfig();
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + ChatColor.GREEN + "Word added successfully to the list!"));
-
-            
-            }
-            else if (args[0].equalsIgnoreCase("info")) {
+            } else if (args[0].equalsIgnoreCase("info")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
                 } 
 
-                
                 String wordlist = getConfig().getStringList("words").toString().replace("[", "").replace("]", "");
                 
                 sender.sendMessage(
@@ -640,21 +519,14 @@ public class AntiSwear
                 sender.sendMessage(ChatColor.GRAY + "Words: " + ChatColor.RED + wordlist);
                 sender.sendMessage(" ");
                 sender.sendMessage(ChatColor.RED + "--------------------------");
-
-            
-            }
-            else if (args[0].equalsIgnoreCase("check")) {
+            } else if (args[0].equalsIgnoreCase("check")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
                 } 
 
-
-                
                 double version = updatecheck();
                 double localversion = Double.parseDouble(this.pdfFile.getVersion());
-
-                
                 if (localversion < version) {
                     sender.sendMessage(ChatColor.RED + "------[ " + 
                             ChatColor.GRAY + "AntiSwear Update" + ChatColor.RED + 
@@ -670,8 +542,7 @@ public class AntiSwear
                         .tooltip("Download page").send(sender);
                     sender.sendMessage(" "); sender.sendMessage(ChatColor.RED + 
                             "-----------------------------");
-                }
-                else {
+                } else {
                     
                     sender.sendMessage(ChatColor.RED + "------[ " + 
                             ChatColor.GRAY + "AntiSwear Update" + ChatColor.RED + 
@@ -681,21 +552,13 @@ public class AntiSwear
                     sender.sendMessage(" ");
                     sender.sendMessage(ChatColor.RED + 
                             "-----------------------------");
-
-
-                
                 }
-
-
-            
-            }
-            else if (args[0].equalsIgnoreCase("debug")) {
+            } else if (args[0].equalsIgnoreCase("debug")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
                 } 
 
-                
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + ChatColor.GREEN + "Sent output to console. Please copy and paste it."));
                 getLogger().info("---------- Antiswear Debug ----------");
@@ -706,8 +569,6 @@ public class AntiSwear
                 getLogger().info("Sound: " + getConfig().getString("soundvalue"));
                 getLogger().info("Balance: " + getConfig().getBoolean("balance"));
 
-
-                
                 if (getServer().getPluginManager().getPlugin("HoloGramAPI") != null) {
                     getLogger().info("HologramAPI: true");
                 } else {
@@ -727,10 +588,7 @@ public class AntiSwear
                 } 
                 
                 getLogger().info("----------- End of debug -----------");
-
-            
-            }
-            else if (args[0].equalsIgnoreCase("remove")) {
+            } else if (args[0].equalsIgnoreCase("remove")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
@@ -749,7 +607,6 @@ public class AntiSwear
                     return true;
                 } 
 
-                
                 List<String> list = getConfig().getStringList("words");
                 list.remove(args[1].toLowerCase());
                 getConfig().set("words", list);
@@ -757,10 +614,7 @@ public class AntiSwear
                 reloadConfig();
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + ChatColor.GREEN + "Word removed successfully from the list!"));
-
-            
-            }
-            else if (args[0].equalsIgnoreCase("prefix")) {
+            } else if (args[0].equalsIgnoreCase("prefix")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
@@ -772,7 +626,6 @@ public class AntiSwear
                     return true;
                 } 
 
-                
                 String message = "";
                 for (int i = 1; i < args.length; i++) {
                     message = String.valueOf(message) + args[i] + " ";
@@ -784,10 +637,7 @@ public class AntiSwear
                 reloadConfig();
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                             String.valueOf(getConfig().getString("prefix")) + " " + ChatColor.GREEN + "Prefix changed successfully."));
-
-            
-            }
-            else if (args[0].equalsIgnoreCase("message")) {
+            } else if (args[0].equalsIgnoreCase("message")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
@@ -799,7 +649,6 @@ public class AntiSwear
                     return true;
                 } 
 
-                
                 String message = "";
                 for (int i = 1; i < args.length; i++) {
                     message = String.valueOf(message) + args[i] + " ";
@@ -811,8 +660,7 @@ public class AntiSwear
                 reloadConfig();
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + ChatColor.GREEN + "Message changed successfully."));
-            }
-            else if (args[0].equalsIgnoreCase("count")) {
+            } else if (args[0].equalsIgnoreCase("count")) {
                 if (!sender.hasPermission("antiswear.mod")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
@@ -822,8 +670,7 @@ public class AntiSwear
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                                 " " + ChatColor.RED + "Usage: " + ChatColor.GRAY + "/as count <player>"));
                     return true;
-                } 
-
+                }
                 
                 FileConfiguration data = this.man.getConfig("data", (Plugin)this);
                 
@@ -831,7 +678,6 @@ public class AntiSwear
                 if (op.hasPlayedBefore()) {
                     UUID uuid = op.getUniqueId();
                     String Suuid = uuid.toString();
-
                     
                     if (!data.contains(Suuid)) {
                         data.set(Suuid, Integer.valueOf(0));
@@ -848,21 +694,16 @@ public class AntiSwear
                     
                     String str1 = WordUtils.capitalize(op.getName());
                     int count = data.getInt(Suuid);
-                    
+
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                                 " " + ChatColor.DARK_GREEN + str1 + " &acursed &e" + count + "&a times."));
                     return true;
                 } 
 
-                
                 String opname = WordUtils.capitalize(op.getName());
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + ChatColor.DARK_RED + opname + " &cnot found."));
-
-
-            
-            }
-            else if (args[0].equalsIgnoreCase("kickmessage")) {
+            } else if (args[0].equalsIgnoreCase("kickmessage")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
@@ -874,7 +715,6 @@ public class AntiSwear
                     return true;
                 } 
 
-                
                 String message = "";
                 for (int i = 1; i < args.length; i++) {
                     message = String.valueOf(message) + args[i] + " ";
@@ -886,9 +726,7 @@ public class AntiSwear
                 reloadConfig();
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + ChatColor.GREEN + "Message changed successfully."));
-            
-            }
-            else if (args[0].equalsIgnoreCase("cc")) {
+            } else if (args[0].equalsIgnoreCase("cc")) {
                 if (!sender.hasPermission("antiswear.mod")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
@@ -1021,10 +859,7 @@ public class AntiSwear
                 Bukkit.broadcastMessage("");
                 Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + getConfig().getString("clearmessage").replaceAll("%player%", sender.getName())));
-
-            
-            }
-            else if (args[0].equalsIgnoreCase("toggle")) {
+            } else if (args[0].equalsIgnoreCase("toggle")) {
                 if (!sender.hasPermission("antiswear.toggle")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
@@ -1043,15 +878,13 @@ public class AntiSwear
                                 .replaceAll("%toggle%", getConfig().getString("unmute"))));
                 }
             
-            }
-            else {
+            } else {
                 
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                             String.valueOf(getConfig().getString("prefix")) + " " + ChatColor.RED + "Invalid subcommand." + 
                             ChatColor.GRAY + " Try /as for the command list."));
             } 
         } 
-        
         return true;
     }
 
@@ -1059,7 +892,6 @@ public class AntiSwear
     public int getSwearCount(UUID uuid) {
         FileConfiguration data = this.man.getConfig("data", (Plugin)this);
         String Suuid = uuid.toString();
-        
         if (!data.contains(Suuid)) {
             data.set(Suuid, Integer.valueOf(0));
             try {
@@ -1072,7 +904,6 @@ public class AntiSwear
                 getLogger().warning("Something went wrong while setting Plan data.");
             } 
         } 
-        
         int count = data.getInt(Suuid);
         return count;
     }

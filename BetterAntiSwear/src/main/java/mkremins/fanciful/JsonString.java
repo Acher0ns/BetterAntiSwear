@@ -6,14 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-
-
-
-
-
-final class JsonString
-    implements JsonRepresentedObject, ConfigurationSerializable
-{
+final class JsonString implements JsonRepresentedObject, ConfigurationSerializable {
     private String _value;
     
     public JsonString(CharSequence value) {
@@ -39,7 +32,6 @@ final class JsonString
         return new JsonString(map.get("stringValue").toString());
     }
 
-    
     public String toString() {
         return this._value;
     }

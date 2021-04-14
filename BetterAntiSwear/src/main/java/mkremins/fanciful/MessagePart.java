@@ -13,12 +13,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
-
-
-
-final class MessagePart
-    implements JsonRepresentedObject, ConfigurationSerializable, Cloneable
-{
+final class MessagePart implements JsonRepresentedObject, ConfigurationSerializable, Cloneable {
     ChatColor color = ChatColor.WHITE;
     ArrayList<ChatColor> styles = new ArrayList<>();
     String clickActionName = null; String clickActionData = null; String hoverActionName = null;
@@ -39,8 +34,6 @@ final class MessagePart
         return (this.text != null);
     }
 
-
-    
     public MessagePart clone() throws CloneNotSupportedException {
         MessagePart obj = (MessagePart)super.clone();
         obj.styles = (ArrayList<ChatColor>)this.styles.clone();
@@ -53,17 +46,11 @@ final class MessagePart
         return obj;
     }
 
-
-
-    
     static {
         ImmutableBiMap.Builder<ChatColor, String> builder = ImmutableBiMap.builder(); byte b; int i; ChatColor[] arrayOfChatColor;
         for (i = (arrayOfChatColor = ChatColor.values()).length, b = 0; b < i; ) { ChatColor style = arrayOfChatColor[b];
             if (style.isFormat()) {
                 String styleName;
-
-
-                
                 switch (style) {
                     case MAGIC:
                         styleName = "obfuscated";
@@ -75,80 +62,11 @@ final class MessagePart
                         styleName = style.name().toLowerCase();
                         break;
                 } 
-                
                 builder.put(style, styleName);
-            }    b++; }
-         stylesToNames = (BiMap<ChatColor, String>)builder.build();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
+            }    
+            b++;
+        }
+        stylesToNames = (BiMap<ChatColor, String>)builder.build();
         ConfigurationSerialization.registerClass(MessagePart.class);
     }
     

@@ -1,7 +1,6 @@
 package mkremins.fanciful;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.HashMap;
@@ -9,51 +8,16 @@ import java.util.Map;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
-
-
-
-
-
-
-public abstract class TextualComponent
-    implements Cloneable
-{
+public abstract class TextualComponent implements Cloneable {
     static {
         ConfigurationSerialization.registerClass(ArbitraryTextTypeComponent.class);
         ConfigurationSerialization.registerClass(ComplexTextTypeComponent.class);
     }
-
     
     public String toString() {
         return getReadableString();
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
     static TextualComponent deserialize(Map<String, Object> map) {
         if (map.containsKey("key") && map.size() == 2 && map.containsKey("value"))
         {
@@ -74,9 +38,7 @@ public abstract class TextualComponent
         return (component instanceof ComplexTextTypeComponent && ((ComplexTextTypeComponent)component).getKey().equals("translate"));
     }
     
-    private static final class ArbitraryTextTypeComponent
-        extends TextualComponent
-        implements ConfigurationSerializable {
+    private static final class ArbitraryTextTypeComponent extends TextualComponent implements ConfigurationSerializable {
         private String _key;
         private String _value;
         
@@ -85,7 +47,6 @@ public abstract class TextualComponent
             setValue(value);
         }
 
-        
         public String getKey() {
             return this._key;
         }
@@ -104,20 +65,13 @@ public abstract class TextualComponent
             this._value = value;
         }
 
-
-
-
-
-        
         public TextualComponent clone() throws CloneNotSupportedException {
             return new ArbitraryTextTypeComponent(getKey(), getValue());
         }
-
         
         public void writeJson(JsonWriter writer) throws IOException {
             writer.name(getKey()).value(getValue());
         }
-
         
         public Map<String, Object> serialize() {
             return new HashMap<String, Object>()
@@ -129,7 +83,6 @@ public abstract class TextualComponent
         public static ArbitraryTextTypeComponent deserialize(Map<String, Object> map) {
             return new ArbitraryTextTypeComponent(map.get("key").toString(), map.get("value").toString());
         }
-
         
         public String getReadableString() {
             return getValue();
@@ -146,7 +99,6 @@ public abstract class TextualComponent
             setKey(key);
             setValue(values);
         }
-
         
         public String getKey() {
             return this._key;
@@ -165,16 +117,10 @@ public abstract class TextualComponent
             Preconditions.checkArgument((value != null), "The value must be specified.");
             this._value = value;
         }
-
-
-
-
-
         
         public TextualComponent clone() throws CloneNotSupportedException {
             return new ComplexTextTypeComponent(getKey(), getValue());
         }
-
         
         public void writeJson(JsonWriter writer) throws IOException {
             writer.name(getKey());
@@ -184,7 +130,6 @@ public abstract class TextualComponent
             }
             writer.endObject();
         }
-
         
         public Map<String, Object> serialize() {
             return new HashMap<String, Object>()
@@ -192,8 +137,6 @@ public abstract class TextualComponent
                 
                 };
         }
-
-
         
         public static ComplexTextTypeComponent deserialize(Map<String, Object> map) {
             String key = null;
@@ -208,34 +151,15 @@ public abstract class TextualComponent
             return new ComplexTextTypeComponent(key, value);
         }
 
-        
         public String getReadableString() {
             return getKey();
         }
     }
 
-
-
-
-
-
-
-    
     public static TextualComponent rawText(String textValue) {
         return new ArbitraryTextTypeComponent("text", textValue);
     }
 
-
-
-
-
-
-
-
-
-
-
-    
     public static TextualComponent localizedText(String translateKey) {
         return new ArbitraryTextTypeComponent("translate", translateKey);
     }
@@ -244,59 +168,23 @@ public abstract class TextualComponent
         throw new UnsupportedOperationException("This feature is only supported in snapshot releases.");
     }
 
-
-
-
-
-
-
-
-
-
-    
     public static TextualComponent objectiveScore(String scoreboardObjective) {
         return objectiveScore("*", scoreboardObjective);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-    
     public static TextualComponent objectiveScore(String playerName, String scoreboardObjective) {
         throwUnsupportedSnapshot();
         
         return null;
     }
 
-
-
-
-
-
-
-
-
-
-    
     public static TextualComponent selector(String selector) {
         throwUnsupportedSnapshot();
-        
         return new ArbitraryTextTypeComponent("selector", selector);
     }
     
     public abstract String getKey();
-    
     public abstract String getReadableString();
-    
     public abstract TextualComponent clone() throws CloneNotSupportedException;
-    
     public abstract void writeJson(JsonWriter paramJsonWriter) throws IOException;
 }

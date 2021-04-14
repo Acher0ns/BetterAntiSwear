@@ -6,10 +6,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
-
-
-public class ConfigManager
-{
+public class ConfigManager {
     public FileConfiguration createConfig(String name, String subdirectory, Plugin plugin) throws IOException {
         File dir = new File(plugin.getDataFolder() + File.separator + subdirectory);
         if (!dir.isDirectory()) {

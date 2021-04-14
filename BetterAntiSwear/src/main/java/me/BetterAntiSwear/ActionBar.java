@@ -6,10 +6,7 @@ import java.lang.reflect.Method;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-
-
-public class ActionBar
-{
+public class ActionBar {
     private static Class<?> craftPlayer;
     private static Class<?> chatPacket;
     private static Class<?> chatComponentText;
@@ -75,7 +72,6 @@ public class ActionBar
         return this;
     }
 
-    
     private static int versionId = Integer.parseInt(Bukkit.getBukkitVersion().split("-")[0].replace(".", "#").split("#")[1]);
     private String message;
 }

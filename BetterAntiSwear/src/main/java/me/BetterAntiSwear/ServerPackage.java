@@ -2,8 +2,7 @@ package me.BetterAntiSwear;
 
 import org.bukkit.Bukkit;
 
-enum ServerPackage
-{
+enum ServerPackage {
     MINECRAFT("net.minecraft.server." + getServerVersion()),
     CRAFTBUKKIT("org.bukkit.craftbukkit." + getServerVersion());
     
@@ -13,7 +12,6 @@ enum ServerPackage
         this.path = path;
     }
 
-    
     public String toString() {
         return this.path;
     }

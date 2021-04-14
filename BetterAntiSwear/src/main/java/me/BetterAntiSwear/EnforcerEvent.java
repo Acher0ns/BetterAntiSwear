@@ -4,8 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class EnforcerEvent
-    extends Event {
+public class EnforcerEvent extends Event {
     Player p;
     Type t;
     
