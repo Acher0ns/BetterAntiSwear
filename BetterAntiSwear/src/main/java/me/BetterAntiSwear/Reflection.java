@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import org.bukkit.Bukkit;
 
+@SuppressWarnings("deprecation")
 public class Reflection {
     public static Class<?> getNMSClass(String name) {
         return getClass("net.minecraft.server." + Bukkit.getServer().getClass().getPackage().getName().substring(23) + "." + name);
@@ -37,7 +38,7 @@ public class Reflection {
         } 
     }
     
-    public static Method getMethod(Object o, String methodName, Class... params) {
+    public static Method getMethod(Object o, String methodName, Class<?>... params) {
         try {
             Method method = o.getClass().getMethod(methodName, params);
             if (!method.isAccessible()) {

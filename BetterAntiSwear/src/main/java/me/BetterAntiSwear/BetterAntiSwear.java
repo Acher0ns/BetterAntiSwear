@@ -1,19 +1,13 @@
 package me.BetterAntiSwear;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -42,6 +36,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+@SuppressWarnings("deprecation")
 public class BetterAntiSwear extends JavaPlugin implements Listener {
     ArrayList<String> globalMute = new ArrayList<>();
     ConfigManager man = new ConfigManager();
@@ -91,22 +86,6 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
     }
     
     public double updatecheck() {
-        double ver = 0.0D;
-        try {
-            HttpURLConnection con = (HttpURLConnection)(new URL("https://api.spigotmc.org/legacy/update.php?resource=16354"))
-                .openConnection();
-            con.setDoOutput(true);
-            con.setRequestMethod("GET");
-            String version = (new BufferedReader(new InputStreamReader(con.getInputStream()))).readLine();
-            if (version.length() <= 7)
-            {
-                ver = Double.parseDouble(version);
-            }
-
-            con.disconnect();
-        } catch (Exception ex) {
-            getLogger().info("Failed to check for an update on Spigot.");
-        } 
         return 1.0D;
     }
 
@@ -164,23 +143,9 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
         if (e.getPlayer().hasPermission("antiswear.bypass")) {
             return;
         }
-        
-        String nonLeet = replaceLeet(ChatColor.stripColor(replaceIgnoredWords(e.getMessage().replace("/", "").replaceAll("&", "§"))));
-        String message = replaceAllSpecialCharWithSpace(nonLeet);
 
-        boolean swears = false;
-        if (message.split(" ").length == 1) {
-            if (getConfig().getStringList("words").stream().map(word -> word.toLowerCase()).anyMatch(message.toLowerCase()::contains)) {
-                swears = true;
-            }
-        } else {
-            if (getConfig().getStringList("words").stream().map(word -> word.toLowerCase() + " ").anyMatch(message.toLowerCase()::contains) || getConfig().getStringList("words").stream().map(word -> " " + word.toLowerCase()).anyMatch(message.toLowerCase()::contains)) {
-                swears = true;
-            }
-        }
-
-        if (swears) {
-            e.setCancelled(true);
+        checkIfSwear(e);
+        if (e.isCancelled()) {
             onSwear(e.getPlayer(), e.getMessage());
         }
     }
@@ -190,7 +155,14 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
         if (e.getPlayer().hasPermission("antiswear.bypass")) {
             return;
         }
-        
+
+        checkIfSwear(e);
+        if (e.isCancelled()) {
+            onSwear(e.getPlayer(), e.getMessage());
+        }
+    }
+
+    public void checkIfSwear(AsyncPlayerChatEvent e) {
         String nonLeet = replaceLeet(ChatColor.stripColor(replaceIgnoredWords(e.getMessage().replace("/", "").replaceAll("&", "§"))));
         String message = replaceAllSpecialCharWithSpace(nonLeet);
 
@@ -217,9 +189,20 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
         //         break;
         //     }
         // }
+    }
 
-        if (e.isCancelled()) {
-            onSwear(e.getPlayer(), e.getMessage());
+    public void checkIfSwear(PlayerCommandPreprocessEvent e) {
+        String nonLeet = replaceLeet(ChatColor.stripColor(replaceIgnoredWords(e.getMessage().replace("/", "").replaceAll("&", "§"))));
+        String message = replaceAllSpecialCharWithSpace(nonLeet);
+
+        // Check for blocked phrases
+        if (getConfig().getStringList("blacklist").stream().map(word -> word.toLowerCase()).filter(word -> word.split(" ").length != 1).anyMatch(message.toLowerCase()::contains)) {
+            e.setCancelled(true);
+        }
+
+        // Check for blocked words - contains
+        if (getConfig().getStringList("blacklist").stream().map(word -> word.toLowerCase()).filter(word -> word.split(" ").length == 1).anyMatch(message.toLowerCase()::contains)) {
+            e.setCancelled(true);
         }
     }
 

@@ -13,6 +13,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
+@SuppressWarnings("unchecked")
 final class MessagePart implements JsonRepresentedObject, ConfigurationSerializable, Cloneable {
     ChatColor color = ChatColor.WHITE;
     ArrayList<ChatColor> styles = new ArrayList<>();

@@ -74,10 +74,7 @@ public abstract class TextualComponent implements Cloneable {
         }
         
         public Map<String, Object> serialize() {
-            return new HashMap<String, Object>()
-                {
-                
-                };
+            return new HashMap<String, Object>();
         }
         
         public static ArbitraryTextTypeComponent deserialize(Map<String, Object> map) {
@@ -132,10 +129,7 @@ public abstract class TextualComponent implements Cloneable {
         }
         
         public Map<String, Object> serialize() {
-            return new HashMap<String, Object>()
-                {
-                
-                };
+            return new HashMap<String, Object>();
         }
         
         public static ComplexTextTypeComponent deserialize(Map<String, Object> map) {

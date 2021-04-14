@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import org.apache.commons.lang.Validate;
 
+@SuppressWarnings("unchecked")
 public final class ArrayWrapper<E> {
     private E[] _array;
     
@@ -21,22 +22,24 @@ public final class ArrayWrapper<E> {
         this._array = (E[])array;
     }
 
-    public boolean equals(Object other) {
-        if (!(other instanceof ArrayWrapper)) {
+    public boolean equals(Object obj) {
+        if (!(obj instanceof ArrayWrapper)) {
             return false;
         }
-        return Arrays.equals((Object[])this._array, (Object[])((ArrayWrapper)other)._array);
+        ArrayWrapper<E> other = (ArrayWrapper<E>)obj;
+        return Arrays.equals(this._array, other._array);
     }
 
     public int hashCode() {
         return Arrays.hashCode((Object[])this._array);
     }
 
+    @SuppressWarnings("unused")
     public static <T> T[] toArray(Iterable<? extends T> list, Class<T> c) {
         int size = -1;
         if (list instanceof Collection) {
             
-            Collection coll = (Collection)list;
+            Collection<T> coll = (Collection<T>)list;
             size = coll.size();
         } 
 
