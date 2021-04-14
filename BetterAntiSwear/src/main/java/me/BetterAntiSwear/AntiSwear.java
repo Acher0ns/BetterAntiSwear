@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -183,32 +184,41 @@ public class AntiSwear extends JavaPlugin implements Listener {
             return;
         }
         
-        String me2 = e.getMessage().replace("/", "");
-        String messagens = ChatColor.stripColor(me2.replaceAll("&", "§"));
-        for (String word : getConfig().getStringList("words")) {
-            byte b; int i; String[] arrayOfString; 
-            for (i = (arrayOfString = messagens.split(" ")).length, b = 0; b < i; ) { String message = arrayOfString[b];
-                StringBuilder builder = new StringBuilder(); byte b1; int j; char[] arrayOfChar;
-                for (j = (arrayOfChar = message.toCharArray()).length, b1 = 0; b1 < j; ) { char character = arrayOfChar[b1];
-                    if ((character >= '0' && character <= '9') || (character >= 'A' && character <= 'Z') || (
-                        character >= 'a' && character <= 'z')) {
-                        builder.append(character);
-                    }
-                    b1++;
-                }
-
-                String filtered = builder.toString();
-                if (filtered.toLowerCase().equalsIgnoreCase(word.toLowerCase()))
-                {
-                    e.setCancelled(true);
-                }
-                b++; }
-        } 
-        
-        if (e.isCancelled())
-        {
+        String message = ChatColor.stripColor(e.getMessage().replace("/", "").replaceAll("&", "§"));
+        if (getConfig().getStringList("words").stream().map(word -> word.toLowerCase()).anyMatch(message.toLowerCase()::contains)) {
+            e.setCancelled(true);
             onSwear(e.getPlayer(), e.getMessage());
         }
+        // for (String word : getConfig().getStringList("words")) {
+            // byte b;
+            // int i; 
+            // String[] arrayOfString; 
+            // for (i = (arrayOfString = messagens.split(" ")).length, b = 0; b < i; ) { String message = arrayOfString[b];
+            //     StringBuilder builder = new StringBuilder(); 
+
+            //     byte b1; 
+            //     int j; 
+            //     char[] arrayOfChar;
+            //     for (j = (arrayOfChar = message.toCharArray()).length, b1 = 0; b1 < j; ) { char character = arrayOfChar[b1];
+            //         if ((character >= '0' && character <= '9') || (character >= 'A' && character <= 'Z') || (
+            //             character >= 'a' && character <= 'z')) {
+            //             builder.append(character);
+            //         }
+            //         b1++;
+            //     }
+
+            //     String filtered = builder.toString();
+            //     if (filtered.toLowerCase().equalsIgnoreCase(word.toLowerCase()))
+            //     {
+            //         e.setCancelled(true);
+            //     }
+            //     b++; 
+            // }
+        //} 
+        // if (e.isCancelled())
+        // {
+        //     onSwear(e.getPlayer(), e.getMessage());
+        // }
     }
 
     public void onSwear(final Player p, String message) {
