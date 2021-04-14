@@ -127,6 +127,23 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                     .link("https://www.spigotmc.org/resources/advanced-antiswear.16354/")
                     .tooltip("Advanced AntiSwear download page").send(p);
             } 
+        }
+
+        FileConfiguration data = this.man.getConfig("data", (Plugin)this);
+        UUID uuid = p.getUniqueId();
+        String Suuid = uuid.toString();
+        if (!data.contains(Suuid)) {
+            data.set(Suuid, 0);
+            try {
+                this.man.saveConfig(data, "data", (Plugin)this);
+                this.man.reloadConfig("data", (Plugin)this);
+            } catch (IOException e) {
+                if (getConfig().getBoolean("debug")) {
+                    e.printStackTrace();
+                }
+                getLogger().warning("Something went wrong while setting Plan data.");
+            }
+            return;
         } 
     }
 
@@ -261,13 +278,13 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
         }
         
         if (!this.swearCount.containsKey(p.getName())) {
-            this.swearCount.put(p.getName(), Integer.valueOf(1));
+            this.swearCount.put(p.getName(), 1);
         } else {  
-            this.swearCount.put(p.getName(), Integer.valueOf(((Integer)this.swearCount.get(p.getName())).intValue() + 1));
-        } 
+            this.swearCount.put(p.getName(), this.swearCount.get(p.getName()) + 1);
+        }
         
         if (getConfig().getBoolean("kick")) {
-            if (((Integer)this.swearCount.get(p.getName())).intValue() >= getConfig().getInt("times")) {
+            if (this.swearCount.get(p.getName()) >= getConfig().getInt("times")) {
                 this.swearCount.put(p.getName(), Integer.valueOf(0));
                 Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin)this, () -> {
                     p.kickPlayer(ChatColor.translateAlternateColorCodes('&', ChatColor.RED + BetterAntiSwear.config.getString("kickmessage").replaceAll("%player%", p.getName())));
@@ -353,7 +370,8 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                     getConfig().getString("message").replaceAll("%player%", p.getName())
                 })));
             }
-        } 
+        }
+        updateSwearCount(p);
     }
 
     public void onEnable() {
@@ -715,29 +733,10 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                     return true;
                 }
                 
-                FileConfiguration data = this.man.getConfig("data", (Plugin)this);
-                
                 OfflinePlayer op = Bukkit.getOfflinePlayer(args[1]);
                 if (op.hasPlayedBefore()) {
-                    UUID uuid = op.getUniqueId();
-                    String Suuid = uuid.toString();
-                    
-                    if (!data.contains(Suuid)) {
-                        data.set(Suuid, Integer.valueOf(0));
-                        try {
-                            this.man.saveConfig(data, "data", (Plugin)this);
-                            this.man.reloadConfig("data", (Plugin)this);
-                        } catch (IOException e) {
-                            if (getConfig().getBoolean("debug")) {
-                                e.printStackTrace();
-                            }
-                            getLogger().warning("Something went wrong while setting Plan data.");
-                        } 
-                    } 
-                    
                     String str1 = WordUtils.capitalize(op.getName());
-                    int count = data.getInt(Suuid);
-
+                    int count = getSwearCount(op.getUniqueId());
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                                 " " + ChatColor.DARK_GREEN + str1 + " &acursed &e" + count + "&a times."));
                     return true;
@@ -778,7 +777,7 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 for (int i = 0; i < 125; i++) {
                     Bukkit.broadcastMessage("");
                 }
-                
+
                 Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + getConfig().getString("clearmessage").replaceAll("%player%", sender.getName())));
             } else if (args[0].equalsIgnoreCase("toggle")) {
@@ -807,7 +806,6 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
         } 
         return true;
     }
-
     
     public int getSwearCount(UUID uuid) {
         FileConfiguration data = this.man.getConfig("data", (Plugin)this);
@@ -826,5 +824,39 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
         } 
         int count = data.getInt(Suuid);
         return count;
+    }
+
+    public void updateSwearCount(final Player player) {
+        FileConfiguration data = this.man.getConfig("data", (Plugin)this);
+        UUID uuid = player.getUniqueId();
+        String Suuid = uuid.toString();
+        if (!data.contains(Suuid)) {
+            data.set(Suuid, 0);
+            try {
+                this.man.saveConfig(data, "data", (Plugin)this);
+                this.man.reloadConfig("data", (Plugin)this);
+            } catch (IOException e) {
+                if (getConfig().getBoolean("debug")) {
+                    e.printStackTrace();
+                }
+                getLogger().warning("Something went wrong while setting Plan data.");
+            }
+            return;
+        }
+
+        if (!this.swearCount.containsKey(player.getName())) {
+            this.swearCount.put(player.getName(), 0);
+        }
+
+        data.set(Suuid, this.swearCount.get(player.getName()));
+        try {
+            this.man.saveConfig(data, "data", (Plugin)this);
+            this.man.reloadConfig("data", (Plugin)this);
+        } catch (IOException e) {
+            if (getConfig().getBoolean("debug")) {
+                e.printStackTrace();
+            }
+            getLogger().warning("Something went wrong while setting Plan data.");
+        }
     }
 }
