@@ -553,7 +553,7 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 String whitelist = getConfig().getStringList("words").toString().replace("[", "").replace("]", "");
                 
                 sender.sendMessage(
-                        ChatColor.RED + "------[ " + ChatColor.GRAY + "AntiSwear Info" + ChatColor.RED + " ]------");
+                        ChatColor.RED + "------[ " + ChatColor.GRAY + "BetterAntiSwear Info" + ChatColor.RED + " ]------");
                 sender.sendMessage(" ");
                 sender.sendMessage(ChatColor.GRAY + "Prefix: " + 
                         ChatColor.translateAlternateColorCodes('&', getConfig().getString("prefix")));
