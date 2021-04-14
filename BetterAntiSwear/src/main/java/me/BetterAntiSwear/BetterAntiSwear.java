@@ -43,7 +43,6 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class BetterAntiSwear extends JavaPlugin implements Listener {
-    HashMap<String, Integer> swearCount = new HashMap<>();
     ArrayList<String> globalMute = new ArrayList<>();
     ConfigManager man = new ConfigManager();
     private PluginDescriptionFile pdfFile;
@@ -277,15 +276,9 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
             logToFile("[" + this.format.format(this.now) + "] " + p.getName() + ": " + message);
         }
         
-        if (!this.swearCount.containsKey(p.getName())) {
-            this.swearCount.put(p.getName(), 1);
-        } else {  
-            this.swearCount.put(p.getName(), this.swearCount.get(p.getName()) + 1);
-        }
-        
+        incrementSwearCount(p);
         if (getConfig().getBoolean("kick")) {
-            if (this.swearCount.get(p.getName()) >= getConfig().getInt("times")) {
-                this.swearCount.put(p.getName(), Integer.valueOf(0));
+            if (getSwearCount(p.getUniqueId()) % getConfig().getInt("times") == 0) {
                 Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin)this, () -> {
                     p.kickPlayer(ChatColor.translateAlternateColorCodes('&', ChatColor.RED + BetterAntiSwear.config.getString("kickmessage").replaceAll("%player%", p.getName())));
                 });
@@ -371,7 +364,6 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 })));
             }
         }
-        updateSwearCount(p);
     }
 
     public void onEnable() {
@@ -461,6 +453,7 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                     return true;
                 } 
                 reloadConfig();
+                this.man.reloadConfig("data", (Plugin)this);
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + ChatColor.RED + getConfig().getString("reload_message")));
             } else if (args[0].equalsIgnoreCase("help")) {
@@ -826,29 +819,15 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
         return count;
     }
 
-    public void updateSwearCount(final Player player) {
+    public void incrementSwearCount(final Player player) {
         FileConfiguration data = this.man.getConfig("data", (Plugin)this);
         UUID uuid = player.getUniqueId();
         String Suuid = uuid.toString();
         if (!data.contains(Suuid)) {
             data.set(Suuid, 0);
-            try {
-                this.man.saveConfig(data, "data", (Plugin)this);
-                this.man.reloadConfig("data", (Plugin)this);
-            } catch (IOException e) {
-                if (getConfig().getBoolean("debug")) {
-                    e.printStackTrace();
-                }
-                getLogger().warning("Something went wrong while setting Plan data.");
-            }
-            return;
         }
+        data.set(Suuid, getSwearCount(uuid) + 1);
 
-        if (!this.swearCount.containsKey(player.getName())) {
-            this.swearCount.put(player.getName(), 0);
-        }
-
-        data.set(Suuid, this.swearCount.get(player.getName()));
         try {
             this.man.saveConfig(data, "data", (Plugin)this);
             this.man.reloadConfig("data", (Plugin)this);
