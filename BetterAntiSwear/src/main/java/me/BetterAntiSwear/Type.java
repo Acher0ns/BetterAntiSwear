@@ -1,4 +1,4 @@
- package me.BetterAntiSwear;
- public enum Type {
-     KICK;
- }
+package me.BetterAntiSwear;
+public enum Type {
+    KICK;
+}
