@@ -2,7 +2,7 @@
 
 #Swear word list
 #You can add or remove words in-game by using /as add and /as remove.
-words:
+blacklist:
   - "fuck"
   - "shit"
   - "fag"
@@ -1896,11 +1896,10 @@ words:
   - "zoophile"
   - "zoophilia"
   - "zubb"
-  - "test_ing"
   
 #Ignored word list, words that are ignored
 #Cant be edited w/ command line.
-ignored:
+whitelist:
   - fun
   - night
   - class
@@ -1908,6 +1907,11 @@ ignored:
   - mass
   - bass
   - nigeria
+  - grass
+  - glass
+  - assume
+  - assist
+  - sam
 
 #The message that is displayed if they swear.
 chatmessage: true

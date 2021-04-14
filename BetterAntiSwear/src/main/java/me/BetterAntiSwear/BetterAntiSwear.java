@@ -179,12 +179,12 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
         String message = replaceAllSpecialCharWithSpace(nonLeet);
 
         // Check for blocked phrases
-        if (getConfig().getStringList("words").stream().map(word -> word.toLowerCase()).filter(word -> word.split(" ").length != 1).anyMatch(message.toLowerCase()::contains)) {
+        if (getConfig().getStringList("blacklist").stream().map(word -> word.toLowerCase()).filter(word -> word.split(" ").length != 1).anyMatch(message.toLowerCase()::contains)) {
             e.setCancelled(true);
         }
 
         // Check for blocked words - contains
-        if (getConfig().getStringList("words").stream().map(word -> word.toLowerCase()).filter(word -> word.split(" ").length == 1).anyMatch(message.toLowerCase()::contains)) {
+        if (getConfig().getStringList("blacklist").stream().map(word -> word.toLowerCase()).filter(word -> word.split(" ").length == 1).anyMatch(message.toLowerCase()::contains)) {
             e.setCancelled(true);
         }
 
@@ -248,7 +248,7 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
     }
 
     public String replaceIgnoredWords(String string) {
-        for (String ignoredWord : getConfig().getStringList("ignored")) {
+        for (String ignoredWord : getConfig().getStringList("whitelist")) {
             string = string.replace(ignoredWord, " ");
         }
         return string;
@@ -416,9 +416,9 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
         if (cmd.getName().equalsIgnoreCase("antiswear")) {
             if (args.length == 0) {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                            "&6]&l&m-------------&r&6[&c&lAdvanced AntiSwear&6]&l&m-------------&r&6["));
+                            "&6]&l&m--------------&r&6[&c&lBetterAntiSwear&6]&l&m--------------&r&6["));
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&l- &eAuthor: &a&null"));
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&l- &eAuthor: &a&lnull"));
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&l- &eTwitter: &a&lnull"));
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
                 sender.sendMessage(
@@ -433,7 +433,7 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                         ChatColor.translateAlternateColorCodes('&', "&7&l- &e/as help&7 for a list of commands"));
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                            "&6]&l&m-------------&r&6[&c&lAdvanced AntiSwear&6]&l&m-------------&r&6["));
+                            "&6]&l&m--------------&r&6[&c&lBetterAntiSwear&6]&l&m--------------&r&6["));
                 return true;
             } 
             
@@ -445,24 +445,23 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 reloadConfig();
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + ChatColor.RED + getConfig().getString("reload_message")));
-            }
-            else if (args[0].equalsIgnoreCase("help")) {
+            } else if (args[0].equalsIgnoreCase("help")) {
                 if (args.length == 1) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&6]&l&m-------------&r&6[&c&lAdvanced AntiSwear&6]&l&m-------------&r&6["));
+                                "&6]&l&m--------------&r&6[&c&lBetterAntiSwear&6]&l&m--------------&r&6["));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as message &7                     Change the chat message."));
+                                "&7&l- &e/as message &7              Change the chat message."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as prefix &7                            Change chat prefix."));
+                                "&7&l- &e/as prefix &7                 Change chat prefix."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as kickmessage &7        Change kick message."));
+                                "&7&l- &e/as kickmessage &7         Change kick message."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as add &7                                    Add a swear word."));
+                                "&7&l- &e/as add &7                    Add a word to a config list."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as remove &7                        Remove a swear word."));
+                                "&7&l- &e/as remove &7               Remove a word from config list."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as help 2 &7                            Help menu 2."));
+                                "&7&l- &e/as help 2 &7                 Help menu 2."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                                 "&6]&l&m-------------------&r&6[&c&lHelp 1&6]&l&m-------------------&r&6["));
@@ -471,20 +470,20 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 
                 if (args[1].equalsIgnoreCase("1")) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&6]&l&m-------------&r&6[&c&lAdvanced AntiSwear&6]&l&m-------------&r&6["));
+                                "&6]&l&m--------------&r&6[&c&lBetterAntiSwear&6]&l&m--------------&r&6["));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as message &7                     Change the chat message."));
+                                "&7&l- &e/as message &7              Change the chat message."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as prefix &7                            Change chat prefix."));
+                                "&7&l- &e/as prefix &7                 Change chat prefix."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as kickmessage &7        Change kick message."));
+                                "&7&l- &e/as kickmessage &7         Change kick message."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as add &7                                    Add a swear word."));
+                                "&7&l- &e/as add &7                    Add a word to a config list."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as remove &7                        Remove a swear word."));
+                                "&7&l- &e/as remove &7               Remove a word from config list."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as help 2 &7                            Help menu 2."));
+                                "&7&l- &e/as help 2 &7                 Help menu 2."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                                 "&6]&l&m-------------------&r&6[&c&lHelp 1&6]&l&m-------------------&r&6["));
@@ -493,20 +492,20 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
 
                 if (args[1].equalsIgnoreCase("2")) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&6]&l&m-------------&r&6[&c&lAdvanced AntiSwear&6]&l&m-------------&r&6["));
+                                "&6]&l&m--------------&r&6[&c&lBetterAntiSwear&6]&l&m--------------&r&6["));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as info &7                                    Show Antiswear info."));
+                                "&7&l- &e/as info &7                   Show BetterAntiSwear info."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as toggle &7                            Toggle globalmute."));
+                                "&7&l- &e/as toggle &7                Toggle globalmute."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as cc &7                                         Clear the entire chat."));
+                                "&7&l- &e/as cc &7                     Clear the entire chat."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as debug &7                             Send debug output to console."));
+                                "&7&l- &e/as debug &7                 Send debug output to console."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as check &7                             Check for updates."));
+                                "&7&l- &e/as check &7                 Check for updates."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                "&7&l- &e/as count    &7                             Check how many times a player sweared."));
+                                "&7&l- &e/as count &7                 Check how many times a player sweared."));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                                 "&6]&l&m-------------------&r&6[&c&lHelp 2&6]&l&m-------------------&r&6["));
@@ -526,20 +525,20 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 } else if (args[1].equalsIgnoreCase("whitelist")) {
                     listName = "whitelist";
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                String.valueOf(getConfig().getString("prefix")) + " " + ChatColor.RED + "Please enter a valid list."));
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
+                                " " + ChatColor.RED + "Usage: " + ChatColor.GRAY + "/as add <whitelist/blacklist> <word>"));
                     return true;
                 }
                 
                 if (args.length == 2) {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                String.valueOf(getConfig().getString("prefix")) + " " + ChatColor.RED + "Please enter a word."));
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
+                                " " + ChatColor.RED + "Usage: " + ChatColor.GRAY + "/as add <whitelist/blacklist> <word>"));
                     return true;
                 } 
 
                 if (getConfig().getStringList(listName).contains(args[2])) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
-                                " " + ChatColor.RED + "This word is already on the list!"));
+                                " " + ChatColor.RED + "This word is already on the " + listName + "!"));
                     return true;
                 } 
 
@@ -580,34 +579,13 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                     return true;
                 } 
 
-                double version = updatecheck();
-                double localversion = Double.parseDouble(this.pdfFile.getVersion());
-                if (localversion < version) {
-                    sender.sendMessage(ChatColor.RED + "------[ " + 
-                            ChatColor.GRAY + "AntiSwear Update" + ChatColor.RED + 
-                            " ]------"); sender.sendMessage(" ");
-                    sender.sendMessage(ChatColor.DARK_RED + 
-                            "This server is running an older version (" + 
-                            this.pdfFile.getVersion() + 
-                            "), the newest version available is " + version + ".");
-                    sender.sendMessage(" ");
-                    (new FancyMessage("Click here to go to the download page."))
-                        .color(ChatColor.RED).link(
-                            "https://www.spigotmc.org/resources/advanced-antiswear.16354/")
-                        .tooltip("Download page").send(sender);
-                    sender.sendMessage(" "); sender.sendMessage(ChatColor.RED + 
-                            "-----------------------------");
-                } else {
-                    
-                    sender.sendMessage(ChatColor.RED + "------[ " + 
-                            ChatColor.GRAY + "AntiSwear Update" + ChatColor.RED + 
-                            " ]------"); sender.sendMessage(" ");
-                    sender.sendMessage(ChatColor.GREEN + 
-                            "This server is running the latest version of Advanced AntiSwear.");
-                    sender.sendMessage(" ");
-                    sender.sendMessage(ChatColor.RED + 
-                            "-----------------------------");
-                }
+                sender.sendMessage(ChatColor.RED + "------[ " + ChatColor.GRAY + "BetterAntiSwear Update" + ChatColor.RED + " ]------"); 
+                sender.sendMessage(" ");
+                sender.sendMessage(ChatColor.GREEN + "This server is running the latest version of BetterAntiSwear.");
+                sender.sendMessage(ChatColor.GREEN + "Contact Neonix#1337 if you want something changed ;)");
+                sender.sendMessage(" ");
+                sender.sendMessage(ChatColor.RED + "-----------------------------");
+
             } else if (args[0].equalsIgnoreCase("debug")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
@@ -615,9 +593,9 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 } 
 
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
-                            " " + ChatColor.GREEN + "Sent output to console. Please copy and paste it."));
-                getLogger().info("---------- Antiswear Debug ----------");
-                getLogger().info("Antiswear version " + this.pdfFile.getVersion());
+                            " " + ChatColor.GREEN + "Sent output to console..."));
+                getLogger().info("---------- BetterAntiswear Debug ----------");
+                getLogger().info("BetterAntiswear version " + this.pdfFile.getVersion());
                 getLogger().info("Server version " + Bukkit.getVersion());
                 getLogger().info("Damage: " + getConfig().getBoolean("damagetoggle") + " | Amount: " + 
                         getConfig().getInt("damage"));
@@ -648,27 +626,37 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
                 } 
+
+                String listName;
+                if (args[1].equalsIgnoreCase("blacklist")) {
+                    listName = "blacklist";
+                } else if (args[1].equalsIgnoreCase("whitelist")) {
+                    listName = "whitelist";
+                } else {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
+                                " " + ChatColor.RED + "Usage: " + ChatColor.GRAY + "/as remove <whitelist/blacklist> <word>"));
+                    return true;
+                }
                 
-                if (args.length == 1) {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                String.valueOf(getConfig().getString("prefix")) + " " + ChatColor.RED + "Please enter a word."));
+                if (args.length == 2) {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
+                                " " + ChatColor.RED + "Usage: " + ChatColor.GRAY + "/as remove <whitelist/blacklist> <word>"));
                     return true;
                 } 
 
-                
-                if (!getConfig().getStringList("words").contains(args[1])) {
+                if (!getConfig().getStringList(listName).contains(args[2])) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                                 String.valueOf(getConfig().getString("prefix")) + " " + ChatColor.RED + "Word not found."));
                     return true;
                 } 
 
-                List<String> list = getConfig().getStringList("words");
-                list.remove(args[1].toLowerCase());
-                getConfig().set("words", list);
+                List<String> list = getConfig().getStringList(listName);
+                list.remove(args[2].toLowerCase());
+                getConfig().set(listName, list);
                 saveConfig();
                 reloadConfig();
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
-                            " " + ChatColor.GREEN + "Word removed successfully from the list!"));
+                            " " + ChatColor.GREEN + "Word removed successfully from the " + listName + "!"));
             } else if (args[0].equalsIgnoreCase("prefix")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
@@ -786,132 +774,11 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
                 } 
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
-                Bukkit.broadcastMessage("");
+
+                for (int i = 0; i < 125; i++) {
+                    Bukkit.broadcastMessage("");
+                }
+                
                 Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + getConfig().getString("clearmessage").replaceAll("%player%", sender.getName())));
             } else if (args[0].equalsIgnoreCase("toggle")) {
@@ -932,9 +799,7 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                                 String.valueOf(getConfig().getString("prefix")) + " " + getConfig().getString("mute_toggle")
                                 .replaceAll("%toggle%", getConfig().getString("unmute"))));
                 }
-            
             } else {
-                
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                             String.valueOf(getConfig().getString("prefix")) + " " + ChatColor.RED + "Invalid subcommand." + 
                             ChatColor.GRAY + " Try /as for the command list."));
