@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -41,7 +42,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class AntiSwear extends JavaPlugin implements Listener {
+public class BetterAntiSwear extends JavaPlugin implements Listener {
     HashMap<String, Integer> swearCount = new HashMap<>();
     ArrayList<String> globalMute = new ArrayList<>();
     ConfigManager man = new ConfigManager();
@@ -107,7 +108,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
         } catch (Exception ex) {
             getLogger().info("Failed to check for an update on Spigot.");
         } 
-        return ver;
+        return 1.0D;
     }
 
     @EventHandler
@@ -148,32 +149,22 @@ public class AntiSwear extends JavaPlugin implements Listener {
             return;
         }
         
-        String me1 = e.getMessage().replace("/", "");
-        String message = ChatColor.stripColor(me1.replaceAll("&", "§"));
-        if (message.startsWith("as") || message.startsWith("antiswear") || message.startsWith("asw")) {
-            return;
+        String nonLeet = replaceLeet(ChatColor.stripColor(replaceIgnoredWords(e.getMessage().replace("/", "").replaceAll("&", "§"))));
+        String message = replaceAllSpecialCharWithSpace(nonLeet);
+
+        boolean swears = false;
+        if (message.split(" ").length == 1) {
+            if (getConfig().getStringList("words").stream().map(word -> word.toLowerCase()).anyMatch(message.toLowerCase()::contains)) {
+                swears = true;
+            }
+        } else {
+            if (getConfig().getStringList("words").stream().map(word -> word.toLowerCase() + " ").anyMatch(message.toLowerCase()::contains) || getConfig().getStringList("words").stream().map(word -> " " + word.toLowerCase()).anyMatch(message.toLowerCase()::contains)) {
+                swears = true;
+            }
         }
 
-        for (String word : getConfig().getStringList("words")) {
-            byte b; int i; String[] arrayOfString; for (i = (arrayOfString = e.getMessage().split(" ")).length, b = 0; b < i; ) { String message1 = arrayOfString[b];
-                
-                StringBuilder builder = new StringBuilder(); byte b1; int j; char[] arrayOfChar;
-                for (j = (arrayOfChar = message1.toCharArray()).length, b1 = 0; b1 < j; ) { char character = arrayOfChar[b1];
-                    if ((character >= '0' && character <= '9') || (character >= 'A' && character <= 'Z') || (
-                        character >= 'a' && character <= 'z'))
-                        builder.append(character); 
-                    b1++; }
-                
-                String filtered = builder.toString();
-                if (filtered.toLowerCase().equalsIgnoreCase(word.toLowerCase()))
-                {
-                    e.setCancelled(true);
-                }
-                b++; }
-        }
-
-        if (e.isCancelled())
-        {
+        if (swears) {
+            e.setCancelled(true);
             onSwear(e.getPlayer(), e.getMessage());
         }
     }
@@ -184,41 +175,83 @@ public class AntiSwear extends JavaPlugin implements Listener {
             return;
         }
         
-        String message = ChatColor.stripColor(e.getMessage().replace("/", "").replaceAll("&", "§"));
-        if (getConfig().getStringList("words").stream().map(word -> word.toLowerCase()).anyMatch(message.toLowerCase()::contains)) {
+        String nonLeet = replaceLeet(ChatColor.stripColor(replaceIgnoredWords(e.getMessage().replace("/", "").replaceAll("&", "§"))));
+        String message = replaceAllSpecialCharWithSpace(nonLeet);
+
+        // Check for blocked phrases
+        if (getConfig().getStringList("words").stream().map(word -> word.toLowerCase()).filter(word -> word.split(" ").length != 1).anyMatch(message.toLowerCase()::contains)) {
             e.setCancelled(true);
+        }
+
+        // Check for blocked words - contains
+        if (getConfig().getStringList("words").stream().map(word -> word.toLowerCase()).filter(word -> word.split(" ").length == 1).anyMatch(message.toLowerCase()::contains)) {
+            e.setCancelled(true);
+        }
+
+        // Check for blocked words - word by word
+        // for (Object blockedWordObj : (getConfig().getStringList("words").stream().filter(word -> word.split(" ").length == 1).toArray())) {
+        //     String blockedWord = (String)blockedWordObj;
+        //     for (String word : message.split(" ")) {
+        //         if (word.equalsIgnoreCase(blockedWord)) {
+        //             e.setCancelled(true);
+        //             break;
+        //         }
+        //     
+        //     if (e.isCancelled()) {
+        //         break;
+        //     }
+        // }
+
+        if (e.isCancelled()) {
             onSwear(e.getPlayer(), e.getMessage());
         }
-        // for (String word : getConfig().getStringList("words")) {
-            // byte b;
-            // int i; 
-            // String[] arrayOfString; 
-            // for (i = (arrayOfString = messagens.split(" ")).length, b = 0; b < i; ) { String message = arrayOfString[b];
-            //     StringBuilder builder = new StringBuilder(); 
+    }
 
-            //     byte b1; 
-            //     int j; 
-            //     char[] arrayOfChar;
-            //     for (j = (arrayOfChar = message.toCharArray()).length, b1 = 0; b1 < j; ) { char character = arrayOfChar[b1];
-            //         if ((character >= '0' && character <= '9') || (character >= 'A' && character <= 'Z') || (
-            //             character >= 'a' && character <= 'z')) {
-            //             builder.append(character);
-            //         }
-            //         b1++;
-            //     }
+    public String replaceLeet(String string) {
+        HashMap<String, String> leetDict = new HashMap<>();
+        leetDict.put("$", "s");
+        leetDict.put("(", "c");
+        leetDict.put("5", "s");
+        leetDict.put("@", "a");
+        leetDict.put("4", "a");
+        leetDict.put("3", "e");
+        leetDict.put("+", "t");
+        leetDict.put("#", "h");
+        leetDict.put("0", "o");
+        leetDict.put("|\\|", "n");
+        leetDict.put("/\\", "a");
+        leetDict.put("/-\\", "a");
+        leetDict.put("^", "a");
+        leetDict.put("\\/", "v");
+        leetDict.put("8", "b");
+        leetDict.put("|_|", "u");
+        leetDict.put("|-|", "h");
+        leetDict.put("Я", "r");
+        leetDict.put("vv", "w");
+        leetDict.put("|<", "k");
+        leetDict.put("[)", "d");
+        leetDict.put("|)", "d");
+        leetDict.put("><", "x");
+        leetDict.put("1", "i");
+        leetDict.put("!", "i");
+        leetDict.put("7", "t");
 
-            //     String filtered = builder.toString();
-            //     if (filtered.toLowerCase().equalsIgnoreCase(word.toLowerCase()))
-            //     {
-            //         e.setCancelled(true);
-            //     }
-            //     b++; 
-            // }
-        //} 
-        // if (e.isCancelled())
-        // {
-        //     onSwear(e.getPlayer(), e.getMessage());
-        // }
+        string = string.replace("\\/\\/", "w");
+        for (String key : leetDict.keySet()) {
+            string = string.replace(key, leetDict.get(key));
+        }
+        return string;
+    }
+
+    public String replaceAllSpecialCharWithSpace(String string) {
+        return string.replaceAll("[^a-zA-Z0-9]+" , "");
+    }
+
+    public String replaceIgnoredWords(String string) {
+        for (String ignoredWord : getConfig().getStringList("ignored")) {
+            string = string.replace(ignoredWord, " ");
+        }
+        return string;
     }
 
     public void onSwear(final Player p, String message) {
@@ -237,7 +270,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
             if (((Integer)this.swearCount.get(p.getName())).intValue() >= getConfig().getInt("times")) {
                 this.swearCount.put(p.getName(), Integer.valueOf(0));
                 Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin)this, () -> {
-                    p.kickPlayer(ChatColor.translateAlternateColorCodes('&', ChatColor.RED + AntiSwear.config.getString("kickmessage").replaceAll("%player%", p.getName())));
+                    p.kickPlayer(ChatColor.translateAlternateColorCodes('&', ChatColor.RED + BetterAntiSwear.config.getString("kickmessage").replaceAll("%player%", p.getName())));
                 });
             } 
             return;
@@ -266,7 +299,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
 
             if (getConfig().getBoolean("damagetoggle")) {
                 Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin)this, () -> {
-                    double damageAmount = Double.parseDouble(AntiSwear.config.getString("damage"));
+                    double damageAmount = Double.parseDouble(BetterAntiSwear.config.getString("damage"));
                     p.damage(damageAmount);
                 }, 
                 1L);
@@ -277,9 +310,9 @@ public class AntiSwear extends JavaPlugin implements Listener {
                 Random rand = new Random();
                 int random = rand.nextInt(10000);
 
-                if (AntiSwear.this.getServer().getPluginManager().getPlugin("HoloGramAPI") != null)
+                if (BetterAntiSwear.this.getServer().getPluginManager().getPlugin("HoloGramAPI") != null)
                 {
-                    HoloGramAPI.createTempHoloGram(loc, AntiSwear.this.getConfig().getString("holomessage").replaceAll("%player%", p.getName()), Integer.valueOf(random), Integer.valueOf(AntiSwear.this.getConfig().getInt("holotime")), false, false, false, null, null, null);
+                    HoloGramAPI.createTempHoloGram(loc, BetterAntiSwear.this.getConfig().getString("holomessage").replaceAll("%player%", p.getName()), Integer.valueOf(random), Integer.valueOf(BetterAntiSwear.this.getConfig().getInt("holotime")), false, false, false, null, null, null);
                 }
             });
             
@@ -362,7 +395,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
         this.globalMute.add("false");
 
         getLogger()
-            .info(String.valueOf(this.pdfFile.getName()) + " Version: " + this.pdfFile.getVersion() + " by brooky1010 is enabled!");
+            .info(String.valueOf(this.pdfFile.getName()) + " Version: " + this.pdfFile.getVersion() + " is enabled!");
         config = getConfig();
         
         Bukkit.getServer().getPluginManager().registerEvents(this, (Plugin)this);
@@ -376,8 +409,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
 
     public void onDisable() {
         this.pdfFile = getDescription();
-        getLogger().info(String.valueOf(this.pdfFile.getName()) + " by brooky1010 is now disabled!");
-        getLogger().info("Website: themilkywalrus.com");
+        getLogger().info(String.valueOf(this.pdfFile.getName()) + " is now disabled!");
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
@@ -386,8 +418,8 @@ public class AntiSwear extends JavaPlugin implements Listener {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                             "&6]&l&m-------------&r&6[&c&lAdvanced AntiSwear&6]&l&m-------------&r&6["));
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&l- &eAuthor: &a&lBrooky1010"));
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&l- &eTwitter: &a&l@TheMilkyWalrus"));
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&l- &eAuthor: &a&null"));
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&l- &eTwitter: &a&lnull"));
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
                 sender.sendMessage(
                         ChatColor.translateAlternateColorCodes('&', "&7&l- &eVersion:&7 " + this.pdfFile.getVersion()));
@@ -482,7 +514,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
                 } 
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                             String.valueOf(getConfig().getString("prefix")) + " &cPlease enter 1 or 2."));
-            } else if (args[0].equalsIgnoreCase("add")) {
+            } else if (args[0].equalsIgnoreCase("blacklist")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
@@ -506,14 +538,40 @@ public class AntiSwear extends JavaPlugin implements Listener {
                 saveConfig();
                 reloadConfig();
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
-                            " " + ChatColor.GREEN + "Word added successfully to the list!"));
+                            " " + ChatColor.GREEN + "Word added successfully to the blacklist!"));
+            } else if (args[0].equalsIgnoreCase("whitelist")) {
+                if (!sender.hasPermission("antiswear.manage")) {
+                    sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
+                    return true;
+                } 
+                
+                if (args.length == 1) {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
+                                String.valueOf(getConfig().getString("prefix")) + " " + ChatColor.RED + "Please enter a word."));
+                    return true;
+                } 
+
+                if (getConfig().getStringList("words").contains(args[1])) {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
+                                " " + ChatColor.RED + "This word is already on the list!"));
+                    return true;
+                } 
+
+                List<String> list = getConfig().getStringList("ignore");
+                list.add(args[1].toLowerCase());
+                getConfig().set("ignore", list);
+                saveConfig();
+                reloadConfig();
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
+                            " " + ChatColor.GREEN + "Word added successfully to the whitelist!"));
             } else if (args[0].equalsIgnoreCase("info")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
                 } 
 
-                String wordlist = getConfig().getStringList("words").toString().replace("[", "").replace("]", "");
+                String blacklist = getConfig().getStringList("words").toString().replace("[", "").replace("]", "");
+                String whitelist = getConfig().getStringList("words").toString().replace("[", "").replace("]", "");
                 
                 sender.sendMessage(
                         ChatColor.RED + "------[ " + ChatColor.GRAY + "AntiSwear Info" + ChatColor.RED + " ]------");
@@ -526,7 +584,8 @@ public class AntiSwear extends JavaPlugin implements Listener {
                         ChatColor.GRAY + "Globalmute: " + ChatColor.GOLD + getConfig().getBoolean("mute_status"));
                 sender.sendMessage(ChatColor.GRAY + "Kick Message: " + 
                         ChatColor.translateAlternateColorCodes('&', getConfig().getString("kickmessage")));
-                sender.sendMessage(ChatColor.GRAY + "Words: " + ChatColor.RED + wordlist);
+                sender.sendMessage(ChatColor.GRAY + "Blacklist: " + ChatColor.RED + blacklist);
+                sender.sendMessage(ChatColor.GRAY + "Whitelist: " + ChatColor.WHITE + whitelist);
                 sender.sendMessage(" ");
                 sender.sendMessage(ChatColor.RED + "--------------------------");
             } else if (args[0].equalsIgnoreCase("check")) {

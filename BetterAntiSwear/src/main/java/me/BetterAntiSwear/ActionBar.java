@@ -35,16 +35,17 @@ public class ActionBar {
                 constructChatText = chatComponentText.getConstructor(new Class[] { String.class });
                 getHandle = craftPlayer.getDeclaredMethod("getHandle", new Class[0]);
             }
-            catch (Exception e) {
-                e.printStackTrace();
-            } 
+            catch (Exception e) {} 
             invoked = true;
         } 
     }
     
     public ActionBar setMessage(Object message) {
         this.message = String.valueOf(message);
-        return this; } public ActionBar send(Player... players) {
+        return this; 
+    } 
+        
+    public ActionBar send(Player... players) {
         try {
             byte b;
             int i;
@@ -66,9 +67,7 @@ public class ActionBar {
                 send.invoke(connection, new Object[] { data });
                 b++; }
         
-        } catch (Exception e) {
-            e.printStackTrace();
-        } 
+        } catch (Exception e) {} 
         return this;
     }
 
