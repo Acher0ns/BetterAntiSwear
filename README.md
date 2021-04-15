@@ -67,12 +67,17 @@ Vault: [Click here](https://www.spigotmc.org/resources/vault.34315/)
 
 # FAQ:
 Q: All the green text in my config is gone.
+
 A: That is caused by adding words or modifying the config from in-game.
 
+
 Q: I edited my sound effect and now the plugin doesn't work anymore.
+
 A: You added an invalid sound effect. Get a full list here.
 
+
 Q: The plugin isn't working.
+
 A: Make sure you have the latest Spigot installed and you are running Java 8.
 
 
