@@ -24,6 +24,18 @@ hs_err_pid*
 
 # Build path
 BetterAntiSwear/target/
+BetterAntiSwear/target/*.jar
+BetterAntiSwear/target/*.yml
+BetterAntiSwear/target/*.java
+BetterAntiSwear/target/*.class
+BetterAntiSwear/target/classes/*.jar
+BetterAntiSwear/target/classes/*.yml
+BetterAntiSwear/target/classes/*.java
+BetterAntiSwear/target/classes/*.class
 
 # Test path
 BetterAntiSwear/src/test/
+BetterAntiSwear/src/test/*.jar
+BetterAntiSwear/src/test/*.yml
+BetterAntiSwear/src/test/*.java
+BetterAntiSwear/src/test/*.class
