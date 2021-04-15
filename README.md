@@ -62,6 +62,7 @@ Improvement on [Advanced AntiSwear](https://www.spigotmc.org/resources/advanced-
 
 # Addon Plugins:
 HologramAPI: [Click here](https://www.spigotmc.org/resources/hologramapi.21286/)
+
 Vault: [Click here](https://www.spigotmc.org/resources/vault.34315/)
 
 
