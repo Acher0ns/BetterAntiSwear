@@ -243,7 +243,7 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
     }
 
     public String replaceAllSpecialCharWithSpace(String string) {
-        return string.replaceAll("[^a-zA-Z0-9\s]+" , "");
+        return string.replaceAll("[^a-zA-Z0-9\s]+", "");
     }
 
     public String replaceIgnoredWords(String string) {
