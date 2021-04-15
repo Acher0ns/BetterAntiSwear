@@ -5,8 +5,8 @@
 blacklist:
  - none
   
-#Ignored word list, words that are ignored
-#Cant be edited w/ command line.
+#Ignored word list
+#You can add or remove words in-game by using /as add and /as remove.
 whitelist:
   - none
 
