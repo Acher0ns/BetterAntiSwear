@@ -1,16 +1,22 @@
 package me.BetterAntiSwear;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import mkremins.fanciful.FancyMessage;
 import n.Z3Z.m.HoloGramAPI;
 import net.milkbowl.vault.economy.Economy;
@@ -85,25 +91,41 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
         return (econ != null);
     }
     
-    public double updatecheck() {
-        return 1.0D;
+    public boolean updateAvailable() {
+        double currentVersion = Double.parseDouble(this.pdfFile.getVersion());
+        double latestVersion = latestVersion();
+        if (currentVersion < latestVersion) {
+            return true;
+        }
+        return false;
+    }
+
+    public double latestVersion() {
+        double version = 0;
+        try {
+            URLConnection connection = new URL("https://api.github.com/repos/Acher0ns/BetterAntiSwear/releases/latest").openConnection();
+            connection.connect();
+            JsonParser jp = new JsonParser();
+            JsonElement root = jp.parse(new InputStreamReader(connection.getInputStream()));
+            JsonObject rootobj = root.getAsJsonObject();
+            version = rootobj.get("tag_name").getAsDouble();
+        } catch (Exception e) {}
+        return version;
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent er) {
         Player p = er.getPlayer();
         if (p.hasPermission("antiswear.manage")) {
-            double version = updatecheck();
-            double localversion = Double.parseDouble(this.pdfFile.getVersion());
-            if (localversion < version) {
+            if (updateAvailable()) {
                 p.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                             String.valueOf(getConfig().getString("prefix")) + " &cThis server is running an older version (" + 
                             this.pdfFile.getVersion() + 
-                            ") of Advanced Antiswear. The newest version available is " + version + ". Only people with the permission" + 
+                            ") of BetterAntiswear. The newest version available is " + latestVersion() + ". Only people with the permission" + 
                             " &e&oantiswear.manage&r&c can see this message."));
                 (new FancyMessage("Click here to go to the download page.")).color(ChatColor.GREEN)
-                    .link("https://www.spigotmc.org/resources/advanced-antiswear.16354/")
-                    .tooltip("Advanced AntiSwear download page").send(p);
+                    .link("https://github.com/Acher0ns/BetterAntiSwear/releases/latest")
+                    .tooltip("BetterAntiSwear download page").send(p);
             } 
         }
 
@@ -144,9 +166,12 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
             return;
         }
 
-        checkIfSwear(e);
-        if (e.isCancelled()) {
-            onSwear(e.getPlayer(), e.getMessage());
+        String nonLeet = replaceLeet(ChatColor.stripColor(replaceIgnoredWords(e.getMessage().replace("/", "").replaceAll("&", "§"))));
+        String message = replaceAllSpecialCharWithSpace(nonLeet);
+
+        if (checkIfSwear(message)) {
+            e.setCancelled(true);
+            onSwear(e.getPlayer(), e.getMessage(), detectedWords(message));
         }
     }
     
@@ -156,54 +181,31 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
             return;
         }
 
-        checkIfSwear(e);
-        if (e.isCancelled()) {
-            onSwear(e.getPlayer(), e.getMessage());
-        }
-    }
-
-    public void checkIfSwear(AsyncPlayerChatEvent e) {
         String nonLeet = replaceLeet(ChatColor.stripColor(replaceIgnoredWords(e.getMessage().replace("/", "").replaceAll("&", "§"))));
         String message = replaceAllSpecialCharWithSpace(nonLeet);
 
-        // Check for blocked phrases
-        if (getConfig().getStringList("blacklist").stream().map(word -> word.toLowerCase()).filter(word -> word.split(" ").length != 1).anyMatch(message.toLowerCase()::contains)) {
+        if (checkIfSwear(message)) {
             e.setCancelled(true);
+            onSwear(e.getPlayer(), e.getMessage(), detectedWords(message));
         }
-
-        // Check for blocked words - contains
-        if (getConfig().getStringList("blacklist").stream().map(word -> word.toLowerCase()).filter(word -> word.split(" ").length == 1).anyMatch(message.toLowerCase()::contains)) {
-            e.setCancelled(true);
-        }
-
-        // Check for blocked words - word by word
-        // for (Object blockedWordObj : (getConfig().getStringList("words").stream().filter(word -> word.split(" ").length == 1).toArray())) {
-        //     String blockedWord = (String)blockedWordObj;
-        //     for (String word : message.split(" ")) {
-        //         if (word.equalsIgnoreCase(blockedWord)) {
-        //             e.setCancelled(true);
-        //             break;
-        //         }
-        //     
-        //     if (e.isCancelled()) {
-        //         break;
-        //     }
-        // }
     }
 
-    public void checkIfSwear(PlayerCommandPreprocessEvent e) {
-        String nonLeet = replaceLeet(ChatColor.stripColor(replaceIgnoredWords(e.getMessage().replace("/", "").replaceAll("&", "§"))));
-        String message = replaceAllSpecialCharWithSpace(nonLeet);
-
+    public boolean checkIfSwear(String message) {
         // Check for blocked phrases
-        if (getConfig().getStringList("blacklist").stream().map(word -> word.toLowerCase()).filter(word -> word.split(" ").length != 1).anyMatch(message.toLowerCase()::contains)) {
-            e.setCancelled(true);
+        if (getConfig().getStringList("blacklist").stream().map(word -> word.toLowerCase()).anyMatch(message.toLowerCase()::contains)) {
+            return true;
         }
+        return false;
+    }
 
-        // Check for blocked words - contains
-        if (getConfig().getStringList("blacklist").stream().map(word -> word.toLowerCase()).filter(word -> word.split(" ").length == 1).anyMatch(message.toLowerCase()::contains)) {
-            e.setCancelled(true);
-        }
+    public List<String> detectedWords(String message) {
+        List<String> swears = new ArrayList<>();
+        getConfig().getStringList("blacklist").stream().map(word -> word.toLowerCase()).forEach(word -> {
+            if (message.toLowerCase().contains(word)) {
+                swears.add(word);
+            }
+        });
+        return swears;
     }
 
     public String replaceLeet(String string) {
@@ -253,7 +255,7 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
         return string;
     }
 
-    public void onSwear(final Player p, String message) {
+    public void onSwear(final Player p, String message, List<String> detectedStrings) {
         this.swears++;
         if (getConfig().getBoolean("log")) {
             logToFile("[" + this.format.format(this.now) + "] " + p.getName() + ": " + message);
@@ -283,6 +285,14 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 .replaceAll("%player%", p.getName())
                 .replaceAll("%message%", message), "antiswear.mod");
         } 
+
+        Bukkit.broadcast(
+            ChatColor.translateAlternateColorCodes('&', 
+            String.valueOf(getConfig().getString("prefix")) + ChatColor.RED + " Detected: " + 
+            ChatColor.DARK_RED + Arrays.toString(detectedStrings.toArray()) + ChatColor.RED + ".")
+            .replace("[", "").replace("]", ""),
+            "antiswear.mod"
+        );
         
         if (p.isOnline()) {
             if (!getConfig().getString("command").equalsIgnoreCase("none")) {
@@ -372,15 +382,14 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
         } 
 
         this.pdfFile = getDescription();
-        double version = updatecheck();
         double localversion = Double.parseDouble(this.pdfFile.getVersion());
-        if (localversion < version) {
-            getLogger().info("There is an update available. This server is running Antiswear version " + localversion + ", but version " + version + "is available.");
+        if (updateAvailable()) {
+            getLogger().info("There is an update available. This server is running BetterAntiswear version " + localversion + ", but version " + latestVersion() + " is available.");
         }
 
         if (getServer().getPluginManager().getPlugin("HoloGramAPI") != null) {
             Bukkit.getConsoleSender()
-                .sendMessage(ChatColor.GOLD + "[AntiSwear] " + ChatColor.GREEN + "Hooked into HoloGramAPI.");
+                .sendMessage(ChatColor.GOLD + "[BetterAntiSwear] " + ChatColor.GREEN + "Hooked into HoloGramAPI.");
         }
         if (this.globalMute.contains("true")) {
             this.globalMute.clear();
@@ -395,7 +404,7 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
 
         if (!setupEconomy()) {
             getLogger()
-                .severe(String.format("Economy module deactivated - Vault not found", new Object[] { getDescription().getName() }));
+                .warning(String.format("Economy module deactivated - Vault not found", new Object[] { getDescription().getName() }));
             return;
         } 
     }
@@ -411,8 +420,7 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
                             "&6]&l&m--------------&r&6[&c&lBetterAntiSwear&6]&l&m--------------&r&6["));
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&l- &eAuthor: &a&lnull"));
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&l- &eTwitter: &a&lnull"));
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&l- &eAuthors: &a&lBrooky1010, Neonix#1337"));
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
                 sender.sendMessage(
                         ChatColor.translateAlternateColorCodes('&', "&7&l- &eVersion:&7 " + this.pdfFile.getVersion()));
@@ -543,6 +551,8 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 reloadConfig();
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + ChatColor.GREEN + "Word added successfully to the " + listName + "!"));
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
+                            " " + ChatColor.RED + getConfig().getString("reload_message")));
             } else if (args[0].equalsIgnoreCase("info")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
@@ -573,12 +583,24 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                     return true;
                 } 
 
-                sender.sendMessage(ChatColor.RED + "------[ " + ChatColor.GRAY + "BetterAntiSwear Update" + ChatColor.RED + " ]------"); 
-                sender.sendMessage(" ");
-                sender.sendMessage(ChatColor.GREEN + "This server is running the latest version of BetterAntiSwear.");
-                sender.sendMessage(ChatColor.GREEN + "Contact Neonix#1337 if you want something changed ;)");
-                sender.sendMessage(" ");
-                sender.sendMessage(ChatColor.RED + "-----------------------------");
+                if (!updateAvailable()) {
+                    sender.sendMessage(ChatColor.RED + "------[ " + ChatColor.GRAY + "BetterAntiSwear Update" + ChatColor.RED + " ]------"); 
+                    sender.sendMessage(" ");
+                    sender.sendMessage(ChatColor.GREEN + "No update available.");
+                    sender.sendMessage(ChatColor.GREEN + "Contact Neonix#1337 for suggestions");
+                    sender.sendMessage(" ");
+                    sender.sendMessage(ChatColor.RED + "---------------------------------");
+                } else {
+                    sender.sendMessage(ChatColor.RED + "------[ " + ChatColor.GRAY + "BetterAntiSwear Update" + ChatColor.RED + " ]------"); 
+                    sender.sendMessage(" ");
+                    sender.sendMessage(ChatColor.GREEN + "Update available!" + this.pdfFile.getVersion() + " -> " + latestVersion());
+                    (new FancyMessage("Click here to go to the download page.")).color(ChatColor.GREEN)
+                    .link("https://github.com/Acher0ns/BetterAntiSwear/releases/latest")
+                    .tooltip("BetterAntiSwear download page").send(sender);
+                    sender.sendMessage(ChatColor.GREEN + "Contact Neonix#1337 for suggestions");
+                    sender.sendMessage(" ");
+                    sender.sendMessage(ChatColor.RED + "----------------------------------");
+                }
 
             } else if (args[0].equalsIgnoreCase("debug")) {
                 if (!sender.hasPermission("antiswear.manage")) {
@@ -651,6 +673,8 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 reloadConfig();
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + ChatColor.GREEN + "Word removed successfully from the " + listName + "!"));
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
+                            " " + ChatColor.RED + getConfig().getString("reload_message")));
             } else if (args[0].equalsIgnoreCase("prefix")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");

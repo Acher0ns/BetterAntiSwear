@@ -1,8 +1,8 @@
 name: BetterAntiSwear
 main: me.BetterAntiSwear.BetterAntiSwear
-author: brooky1010, Neonix#1337
+authors: [brooky1010, Neonix#1337]
 softdepend: [Vault, HologramAPI]
-version: 1.0
+version: 1.1
 
 commands:
   antiswear:
