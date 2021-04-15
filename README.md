@@ -52,9 +52,13 @@ Improvement on [Advanced AntiSwear](https://www.spigotmc.org/resources/advanced-
 
 
 # Permissions:
-- antiswear.* - All permissions.
-- antiswear.mod - Receive a notification if someone swears.
-- antiswear.bypass - Bypass global mute & swear word check.
+- antiswear.* - Gives access to all the permissions.
+- antiswear.bypass - Be able to talk when the chat is muted.
+- antiswear.manage - Manages the messages.
+- antiswear.mod - Receive the message if players tried to swear.
+- antiswear.reload - Reload the BetterAntiSwear config.
+- antiswear.toggle - Be able toggle between global mute and unmute.
+
 
 # Addon Plugins:
 HologramAPI: [Click here](https://www.spigotmc.org/resources/hologramapi.21286/)
