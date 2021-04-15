@@ -62,6 +62,7 @@ Improvement on [Advanced AntiSwear](https://www.spigotmc.org/resources/advanced-
 
 # Addon Plugins:
 HologramAPI: [Click here](https://www.spigotmc.org/resources/hologramapi.21286/)
+
 Vault: [Click here](https://www.spigotmc.org/resources/vault.34315/)
 
 
@@ -82,7 +83,7 @@ A: Make sure you have the latest Spigot installed and you are running Java 8.
 
 
 # Changelog:
-### XX/XX/2021 v1.0:
+### 4/14/2021 v1.0:
  - Made swear filter more comprehensive, instead of searching a message word by word (and rebuilding the message letter by letter to filter the message), now block a message if it contains a blacklisted word.
  - Add a list of whitelisted words to the config to prevent false positives (detecting 'ass' in 'grass'). I believe this is the better approach to blocking swear words as creating a list one whitelisted words is easier than adding all combinations of ways to get arround the original message (going word by word does not block "yyFUCKyy", or combinations thereof, assuming they it not on the blacklist)
  - Add ability to block phrases or words with spaces in them. For Example "f u c k" could not and would not be blocked by the original plugin
