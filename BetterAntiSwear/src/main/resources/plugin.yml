@@ -23,7 +23,7 @@ permissions:
     default: op
 
   antiswear.reload:
-    description: Reload the AntiSwear config.
+    description: Reload the BetterAntiSwear config.
     default: op
    
   antiswear.manage:
