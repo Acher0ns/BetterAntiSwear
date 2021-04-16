@@ -2,13 +2,11 @@
 
 #Swear word list
 #You can add or remove words in-game by using /as add and /as remove.
-blacklist:
- - none
+blacklist: []
   
 #Ignored word list
 #You can add or remove words in-game by using /as add and /as remove.
-whitelist:
-  - none
+whitelist: []
 
 #The message that is displayed if they swear.
 chatmessage: true

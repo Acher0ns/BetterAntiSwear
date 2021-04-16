@@ -289,8 +289,7 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
         Bukkit.broadcast(
             ChatColor.translateAlternateColorCodes('&', 
             String.valueOf(getConfig().getString("prefix")) + ChatColor.RED + " Detected: " + 
-            ChatColor.DARK_RED + Arrays.toString(detectedStrings.toArray()) + ChatColor.RED + ".")
-            .replace("[", "").replace("]", ""),
+            ChatColor.DARK_RED + Arrays.toString(detectedStrings.toArray()).replace("[", "").replace("]", "") + ChatColor.RED + "."),
             "antiswear.mod"
         );
         
@@ -519,7 +518,13 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
                     return true;
-                } 
+                }
+
+                if (args.length == 1) {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
+                                " " + ChatColor.RED + "Usage: " + ChatColor.GRAY + "/as add <whitelist/blacklist> <word>"));
+                    return true;
+                }
 
                 String listName;
                 if (args[1].equalsIgnoreCase("blacklist")) {
@@ -536,21 +541,81 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                                 " " + ChatColor.RED + "Usage: " + ChatColor.GRAY + "/as add <whitelist/blacklist> <word>"));
                     return true;
-                } 
+                }
 
-                if (getConfig().getStringList(listName).contains(args[2])) {
+                String wordsToAdd = "";
+                if (args[2].startsWith("\"") || args[2].startsWith("'")) {
+                    for (int i = 2; i < args.length; i++) {
+                        wordsToAdd += i == args.length - 1 ? args[i] : args[i] + " ";
+                    }
+                    wordsToAdd = wordsToAdd.replace("'", "").replace("\"", "").toLowerCase();
+                } else {
+                    wordsToAdd = args[2].toLowerCase();
+                }
+
+                if (getConfig().getStringList(listName).contains(wordsToAdd)) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
-                                " " + ChatColor.RED + "This word is already on the " + listName + "!"));
+                                " " + ChatColor.RED + "'" + wordsToAdd+ "' is already on the " + listName + "!"));
                     return true;
                 } 
 
                 List<String> list = getConfig().getStringList(listName);
-                list.add(args[2].toLowerCase());
+                list.add(wordsToAdd);
                 getConfig().set(listName, list);
                 saveConfig();
                 reloadConfig();
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + ChatColor.GREEN + "Word added successfully to the " + listName + "!"));
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
+                            " " + ChatColor.RED + getConfig().getString("reload_message")));
+            } else if (args[0].equalsIgnoreCase("remove")) {
+                if (!sender.hasPermission("antiswear.manage")) {
+                    sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
+                    return true;
+                } 
+
+                String listName;
+                if (args[1].equalsIgnoreCase("blacklist")) {
+                    listName = "blacklist";
+                } else if (args[1].equalsIgnoreCase("whitelist")) {
+                    listName = "whitelist";
+                } else {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
+                                " " + ChatColor.RED + "Usage: " + ChatColor.GRAY + "/as remove <whitelist/blacklist> <word>"));
+                    return true;
+                }
+                
+                if (args.length == 2) {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
+                                " " + ChatColor.RED + "Usage: " + ChatColor.GRAY + "/as remove <whitelist/blacklist> <word>"));
+                    return true;
+                }
+
+                String wordsToRemove = "";
+                if (args[2].startsWith("\"") || args[2].startsWith("'")) {
+                    for (int i = 2; i < args.length; i++) {
+                        wordsToRemove += i == args.length - 1 ? args[i] : args[i] + " ";
+                    }
+                    wordsToRemove = wordsToRemove.replace("'", "").replace("\"", "").toLowerCase();
+                } else {
+                    wordsToRemove = args[2].toLowerCase();
+                }
+
+                if (!getConfig().getStringList(listName).contains(wordsToRemove)) {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
+                                String.valueOf(getConfig().getString("prefix")) + " " + ChatColor.RED + "'" + wordsToRemove + "' not found."));
+                    return true;
+                } 
+
+                List<String> list = getConfig().getStringList(listName);
+                while (list.contains(wordsToRemove)) {
+                    list.remove(wordsToRemove);
+                }
+                getConfig().set(listName, list);
+                saveConfig();
+                reloadConfig();
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
+                            " " + ChatColor.GREEN + "Word removed successfully from the " + listName + "!"));
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
                             " " + ChatColor.RED + getConfig().getString("reload_message")));
             } else if (args[0].equalsIgnoreCase("info")) {
@@ -637,44 +702,6 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 } 
                 
                 getLogger().info("----------- End of debug -----------");
-            } else if (args[0].equalsIgnoreCase("remove")) {
-                if (!sender.hasPermission("antiswear.manage")) {
-                    sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
-                    return true;
-                } 
-
-                String listName;
-                if (args[1].equalsIgnoreCase("blacklist")) {
-                    listName = "blacklist";
-                } else if (args[1].equalsIgnoreCase("whitelist")) {
-                    listName = "whitelist";
-                } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
-                                " " + ChatColor.RED + "Usage: " + ChatColor.GRAY + "/as remove <whitelist/blacklist> <word>"));
-                    return true;
-                }
-                
-                if (args.length == 2) {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
-                                " " + ChatColor.RED + "Usage: " + ChatColor.GRAY + "/as remove <whitelist/blacklist> <word>"));
-                    return true;
-                } 
-
-                if (!getConfig().getStringList(listName).contains(args[2])) {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
-                                String.valueOf(getConfig().getString("prefix")) + " " + ChatColor.RED + "Word not found."));
-                    return true;
-                } 
-
-                List<String> list = getConfig().getStringList(listName);
-                list.remove(args[2].toLowerCase());
-                getConfig().set(listName, list);
-                saveConfig();
-                reloadConfig();
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
-                            " " + ChatColor.GREEN + "Word removed successfully from the " + listName + "!"));
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.valueOf(getConfig().getString("prefix")) + 
-                            " " + ChatColor.RED + getConfig().getString("reload_message")));
             } else if (args[0].equalsIgnoreCase("prefix")) {
                 if (!sender.hasPermission("antiswear.manage")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");

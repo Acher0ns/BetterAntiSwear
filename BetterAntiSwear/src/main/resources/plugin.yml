@@ -2,7 +2,8 @@ name: BetterAntiSwear
 main: me.BetterAntiSwear.BetterAntiSwear
 authors: [brooky1010, Neonix#1337]
 softdepend: [Vault, HologramAPI]
-version: 1.1
+version: 1.2
+api-version: 1.16
 
 commands:
   antiswear:
