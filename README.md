@@ -88,7 +88,7 @@ A: Make sure you have the latest Spigot installed and you are running Java 8.
  - Fix detection formatting
  - Properly make config lists blank
  - Add required API version (1.16)
- - Lower java compiler version to increase compatability
+ - Lower java compiler version to increase compatibility
 
 ### 4/15/2021 v1.1:
  - Re-add update check
