@@ -83,6 +83,13 @@ A: Make sure you have the latest Spigot installed and you are running Java 8.
 
 
 # Changelog:
+### 4/16/2021 v1.2:
+ - Can now add/remove phrases to config lists from command line
+ - Fix detection formatting
+ - Properly make config lists blank
+ - Add required API version (1.16)
+ - Lower java compiler version to increase compatability
+
 ### 4/15/2021 v1.1:
  - Re-add update check
  - Broadcast what in the blacklist was detected to mods
