@@ -658,7 +658,7 @@ public class BetterAntiSwear extends JavaPlugin implements Listener {
                 } else {
                     sender.sendMessage(ChatColor.RED + "------[ " + ChatColor.GRAY + "BetterAntiSwear Update" + ChatColor.RED + " ]------"); 
                     sender.sendMessage(" ");
-                    sender.sendMessage(ChatColor.GREEN + "Update available!" + this.pdfFile.getVersion() + " -> " + latestVersion());
+                    sender.sendMessage(ChatColor.GREEN + "Update available! " + this.pdfFile.getVersion() + " -> " + latestVersion());
                     (new FancyMessage("Click here to go to the download page.")).color(ChatColor.GREEN)
                     .link("https://github.com/Acher0ns/BetterAntiSwear/releases/latest")
                     .tooltip("BetterAntiSwear download page").send(sender);
